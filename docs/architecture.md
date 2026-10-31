@@ -52,12 +52,13 @@ modules/<name>/
 
 ## Κανόνες
 
-1. Το `domain` είναι ανεξάρτητο από Next.js, React και ORM.
+1. Το `domain` εισάγει μόνο αρχεία του `domain/` του ίδιου module. Είναι ανεξάρτητο από Next.js, React, ORM και ενσωματωμένα modules του Node (π.χ. `fs`, `node:fs/promises`, `node:crypto`). Τα I/O και η παραγωγή τυχαίων τιμών γίνονται εκτός domain και παρέχονται ως εξαρτήσεις.
 2. Το `application` χρησιμοποιεί το domain και τα ports. Οι υλοποιήσεις συνδέονται στο `server.ts`.
 3. Pages και Route Handlers μένουν μικρά: συνθέτουν/χειρίζονται HTTP και καλούν το `server.ts`.
 4. Κάθε module εκθέτει μόνο: `server.ts` (server λειτουργίες), `contracts.ts` (types) και τα components που βρίσκονται απευθείας στο `presentation/components/` (καταγράφονται στον πίνακα «Δημόσιο API» του README του). Εσωτερικά: `presentation/actions.ts`, `presentation/hooks/`, `presentation/schemas/`, `presentation/components/internal/` (βοηθητικά components). Κανένα import σε εσωτερικά άλλου module.
 4α. Το `server.ts` συνδέει use cases με infrastructure και χρησιμοποιεί domain και contracts. Δεν εισάγει actions ή UI· τα actions καλούν αυτό. Το `domain/` και το `application/` **δεν** εισάγουν κανένα `server.ts` (ούτε του ίδιου ούτε άλλου module).
 4β. Το `presentation/` (actions, components, hooks, schemas) δεν εισάγει domain, application ή infrastructure, ούτε του ίδιου module. Τα actions καλούν το `../server`· τύποι έρχονται από το `../contracts`. Τα components και τα hooks δεν εισάγουν κανένα `server.ts` ούτε το `src/server`.
+4γ. Το `infrastructure/` δεν εισάγει το `presentation/` του ίδιου module, συμπεριλαμβανομένων των schemas και των δημόσιων components του. Οι επιτρεπτές εξαρτήσεις από domain, ports και δημόσια σημεία άλλων modules παραμένουν διαθέσιμες.
 5. Τα Server Actions ελέγχουν δεδομένα, ταυτότητα και δικαιώματα πριν εκτελέσουν την ενέργεια. Το ίδιο ισχύει για κάθε **ανάγνωση** προστατευμένων δεδομένων (π.χ. `listOrders()`), όχι μόνο για τις μεταβολές.
 6. Το `shared` μεγαλώνει μόνο με πραγματική κοινή χρήση και δεν εξαρτάται από `modules/` ή `server/`. Επιχειρησιακοί κανόνες μένουν στο module τους.
 7. Unit/integration tests (Vitest) μένουν δίπλα στον κώδικα (`*.test.ts`). Το `tests/e2e/` (Playwright) είναι για τις συνολικές ροές. Τα use cases ελέγχονται με fake του port, χωρίς infrastructure.
@@ -74,7 +75,7 @@ modules/<name>/
 
 ### Αυτόματος έλεγχος
 
-Οι κανόνες 1, 2, 4, 4α, 4β και 6 ελέγχονται από δύο εργαλεία:
+Οι κανόνες 1, 2, 4, 4α, 4β, 4γ και 6 ελέγχονται από δύο εργαλεία:
 
 | Εργαλείο | Αρχείο | Τι προσφέρει |
 |---|---|---|
@@ -82,6 +83,8 @@ modules/<name>/
 | dependency-cruiser (`npm run arch`) | `.dependency-cruiser.cjs` | Ελέγχει **το αρχείο στο οποίο καταλήγει** κάθε import (aliases του tsconfig, relative paths, imports μόνο τύπων, δυναμικά `import()`). Εντοπίζει και κυκλικές εξαρτήσεις. |
 
 Μαζί καλύπτουν και τα δύο κενά που έχει μόνο του το ESLint: relative imports προς εσωτερικά **άλλου** module και δυναμικά `import()`. Δεν καλύπτεται το `require()` με όνομα που υπολογίζεται κατά την εκτέλεση· απαγορεύεται ως σύμβαση (`AGENTS.md` §7).
+
+Η απαγόρευση ενσωματωμένων modules του Node αφορά τον κώδικα domain, όχι τα `domain/*.test.ts`: τα tests μπορούν να εισάγουν εργαλεία ελέγχου του Node. Οι υπόλοιπες απαγορεύσεις imports του ESLint εξακολουθούν να ισχύουν και στα tests. Οι απαγορεύσεις `Date.now()`, `Math.random()` και του global `crypto` παραμένουν συμβάσεις του `AGENTS.md` §3· οι παραπάνω έλεγχοι αφορούν εισαγωγές εξαρτήσεων.
 
 Τα ίδια τα εργαλεία ελέγχονται από το `tests/architecture/boundaries.test.mjs`: για κάθε κανόνα, ένα απαγορευμένο import πρέπει να αποτυγχάνει και ένα επιτρεπτό να περνά. Αν αλλάξει η ρύθμιση και σταματήσει να προστατεύει ένα όριο, αποτυγχάνει το `npm run test`.
 

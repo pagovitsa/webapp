@@ -1,3 +1,4 @@
+import { builtinModules } from "node:module";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
@@ -43,6 +44,22 @@ function restrict(...groups) {
   return ["error", { patterns: groups }];
 }
 
+const domainRestrictions = [
+  {
+    group: [
+      ...framework,
+      "@/server/**",
+      "@/shared/ui/**",
+      "**/application/**",
+      "**/infrastructure/**",
+      "**/presentation/**",
+    ],
+    message: "Το domain περιέχει μόνο καθαρό TypeScript.",
+  },
+  { group: compositionRoot, message: "Το domain δεν εισάγει server.ts· το server.ts εξαρτάται από το domain." },
+  { group: otherModuleInternals, message: "Το domain δεν εισάγει άλλο module." },
+];
+
 const eslintConfig = [
   ...nextVitals,
   ...nextTs,
@@ -81,6 +98,18 @@ const eslintConfig = [
   },
   // Τα επόμενα αντικαθιστούν (δεν συγχωνεύουν) τον κανόνα του προηγούμενου block,
   // γι' αυτό επαναλαμβάνουν το otherModuleInternals.
+  {
+    files: ["src/modules/*/infrastructure/**", "templates/module/infrastructure/**"],
+    rules: {
+      "no-restricted-imports": restrict(
+        {
+          regex: "^(?:\\.\\./)+presentation(?:/|$)",
+          message: "Το infrastructure δεν εισάγει το presentation του ίδιου module.",
+        },
+        { group: otherModuleInternals, message: "Χρησιμοποίησε τα δημόσια σημεία του άλλου module (server.ts, contracts.ts)." },
+      ),
+    },
+  },
   {
     // Κατεύθυνση: presentation → server.ts. Το server.ts δεν εισάγει actions ή UI.
     files: ["src/modules/*/server.ts", "templates/module/server.ts"],
@@ -122,20 +151,20 @@ const eslintConfig = [
     // Το domain μένει ανεξάρτητο από framework, UI, ORM και υποδομή.
     files: ["src/modules/*/domain/**", "templates/module/domain/**"],
     rules: {
+      "no-restricted-imports": restrict(...domainRestrictions),
+    },
+  },
+  {
+    // Τα tests μπορούν να χρησιμοποιούν εργαλεία Node χωρίς να χαλαρώνουν τα υπόλοιπα όρια.
+    files: ["src/modules/*/domain/**", "templates/module/domain/**"],
+    ignores: ["**/*.test.ts"],
+    rules: {
       "no-restricted-imports": restrict(
+        ...domainRestrictions,
         {
-          group: [
-            ...framework,
-            "@/server/**",
-            "@/shared/ui/**",
-            "**/application/**",
-            "**/infrastructure/**",
-            "**/presentation/**",
-          ],
-          message: "Το domain περιέχει μόνο καθαρό TypeScript.",
+          group: ["node:*", ...builtinModules],
+          message: "Το domain δεν εισάγει ενσωματωμένα modules του Node· τα I/O και η τυχαιότητα παρέχονται ως εξαρτήσεις.",
         },
-        { group: compositionRoot, message: "Το domain δεν εισάγει server.ts· το server.ts εξαρτάται από το domain." },
-        { group: otherModuleInternals, message: "Το domain δεν εισάγει άλλο module." },
       ),
     },
   },
