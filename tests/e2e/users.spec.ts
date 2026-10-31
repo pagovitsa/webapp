@@ -203,3 +203,69 @@ test("API login attempts are rate limited", async ({ request, baseURL }) => {
     expect(Number(limited.headers()["retry-after"])).toBeGreaterThan(0);
   } finally { await db.rateLimit.deleteMany(); }
 });
+
+for (const appearance of ["nucleus", "smart-save", "midnight"]) {
+  test(`${appearance} previews include all four forms and fit a mobile screen`, async ({ page }) => {
+    await page.goto(`/users/previews/${appearance}`);
+    await expect(page.getByRole("heading", { name: `Προεπισκόπηση: ${appearance}`, exact: true })).toBeVisible();
+    for (const name of ["Σύνδεση", "Δημιουργία λογαριασμού", "Ανάκτηση κωδικού", "Νέος κωδικός"]) {
+      const screen = page.getByRole("region", { name: `Φόρμα: ${name}`, exact: true });
+      await expect(screen.getByRole("button")).toBeDisabled();
+      await expect(screen.getByLabel(name === "Ανάκτηση κωδικού" ? "Email" : name === "Νέος κωδικός" ? "Νέος κωδικός" : "Όνομα χρήστη", { exact: true })).toBeVisible();
+    }
+    for (const colorScheme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme });
+      await page.setViewportSize({ width: 375, height: 812 });
+      for (const name of ["Σύνδεση", "Δημιουργία λογαριασμού", "Ανάκτηση κωδικού", "Νέος κωδικός"]) {
+        const screen = page.getByRole("region", { name: `Φόρμα: ${name}`, exact: true });
+        const bounds = await screen.boundingBox();
+        expect(bounds && bounds.x >= 0 && bounds.x + bounds.width <= 375).toBe(true);
+        const inputBounds = await screen.getByRole("textbox").first().boundingBox();
+        expect(inputBounds && inputBounds.x >= 0 && inputBounds.x + inputBounds.width <= 375).toBe(true);
+        const contrasts = await screen.evaluate(element => {
+          const surface = element.querySelector("form")?.parentElement?.parentElement;
+          if (!surface) throw new Error("No form surface.");
+          const canvas = document.createElement("canvas");
+          canvas.width = canvas.height = 1;
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("No color context.");
+          const luminance = (color: string) => {
+            context.clearRect(0, 0, 1, 1);
+            context.fillStyle = color;
+            context.fillRect(0, 0, 1, 1);
+            const rgb = [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).map(value => {
+              const channel = value / 255;
+              return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+            });
+            return (rgb[0] ?? 0) * 0.2126 + (rgb[1] ?? 0) * 0.7152 + (rgb[2] ?? 0) * 0.0722;
+          };
+          const surfaceBackground = getComputedStyle(element).backgroundColor;
+          return ["ui-field__hint", "ui-field__error", "form-message form-message--error"].map(className => {
+            const probe = document.createElement("p");
+            probe.className = className;
+            probe.textContent = "Έλεγχος αναγνωσιμότητας";
+            surface.append(probe);
+            const computed = getComputedStyle(probe);
+            const foreground = luminance(computed.color);
+            const background = luminance(computed.backgroundColor === "rgba(0, 0, 0, 0)" ? surfaceBackground : computed.backgroundColor);
+            probe.remove();
+            return (Math.max(background, foreground) + 0.05) / (Math.min(background, foreground) + 0.05);
+          });
+        });
+        for (const contrast of contrasts) expect(contrast).toBeGreaterThanOrEqual(4.5);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+  });
+}
+
+test("appearance selection stays in code and unknown previews return 404", async ({ page, request }) => {
+  expect((await request.get("/users/previews/not-a-design")).status()).toBe(404);
+  await page.goto("/users/login");
+  const screen = page.getByRole("region", { name: "Φόρμα: Σύνδεση", exact: true });
+  await expect(screen.getByRole("navigation", { name: "Επιλογή λογαριασμού" })).toBeVisible();
+  const background = await screen.evaluate(element => getComputedStyle(element).backgroundColor);
+  await page.goto("/users/login?appearance=midnight");
+  await expect(screen).toHaveCSS("background-color", background);
+  await expect(page.getByRole("navigation", { name: "Προεπισκοπήσεις εμφάνισης" })).toHaveCount(0);
+});

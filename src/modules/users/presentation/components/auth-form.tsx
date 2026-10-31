@@ -5,17 +5,19 @@ import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
 import type { AuthMode, AuthState } from "../../contracts";
 import { authenticateAction } from "../actions";
+import styles from "./auth-form.module.css";
 
 const initial: AuthState = { status: "idle" };
 const labels: Record<AuthMode, string> = { register: "Δημιουργία λογαριασμού", login: "Σύνδεση", "forgot-password": "Αποστολή οδηγιών", "reset-password": "Αλλαγή κωδικού" };
 
-export function AuthForm({ mode, token = "" }: { mode: AuthMode; token?: string }) {
+export function AuthForm({ mode, token = "", preview = false }: { mode: AuthMode; token?: string; preview?: boolean }) {
   const [state, action, pending] = useActionState(authenticateAction.bind(null, mode), initial);
   const values = state.status === "error" ? state.values : undefined;
   const errors = state.fieldErrors;
   return (
     <div className="form-stack">
       <form action={action} className="form-stack" noValidate>
+        <fieldset className={styles.fields} disabled={preview}>
         {mode === "reset-password" && <input type="hidden" name="token" value={token} />}
         {(mode === "login" || mode === "register") && <Field label="Όνομα χρήστη" name="username" autoComplete="username" maxLength={30} required defaultValue={values?.username} error={errors?.username} />}
         {(mode === "register" || mode === "forgot-password") && <Field label="Email" name="email" type="email" autoComplete="email" required defaultValue={values?.email} error={errors?.email} />}
@@ -27,7 +29,8 @@ export function AuthForm({ mode, token = "" }: { mode: AuthMode; token?: string 
         {(mode === "register" || mode === "reset-password") && <Field label="Επιβεβαίωση κωδικού" name="confirmPassword" type="password" autoComplete="new-password" required error={errors?.confirmPassword} />}
         {errors?.token && <p role="alert" className="form-message form-message--error">{errors.token}</p>}
         {state.message && <p role={state.status === "success" ? "status" : "alert"} className={`form-message form-message--${state.status === "success" ? "success" : "error"}`}>{state.message}</p>}
-        <Button type="submit" disabled={pending}>{pending ? "Περίμενε…" : labels[mode]}</Button>
+        <Button type="submit" className={preview ? styles.previewButton : undefined} disabled={pending || preview}>{pending ? "Περίμενε…" : labels[mode]}</Button>
+        </fieldset>
       </form>
       <nav aria-label="Λογαριασμός">
         {mode !== "login" && <p><Link href="/users/login">Σύνδεση</Link></p>}

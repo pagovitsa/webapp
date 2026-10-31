@@ -1,0 +1,568 @@
+.screen {
+  --auth-dark: light-dark(var(--text), var(--surface));
+  --auth-light: light-dark(var(--surface), var(--text));
+  --auth-accent: hsl(from var(--accent) h s 44%);
+  --auth-background: var(--auth-light);
+  --auth-foreground: var(--auth-dark);
+  --auth-muted: color-mix(in srgb, var(--auth-foreground) 65%, var(--auth-background));
+  --auth-border: color-mix(in srgb, var(--auth-foreground) 18%, var(--auth-background));
+  --auth-input: var(--auth-background);
+  --auth-error: hsl(from var(--danger) h s 38%);
+  --auth-button-text: var(--auth-light);
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  min-width: 0;
+  min-height: 660px;
+  overflow: hidden;
+  border: 1px solid var(--auth-border);
+  border-radius: 24px;
+  background: var(--auth-background);
+  color: var(--auth-foreground);
+  box-shadow: 0 24px 64px -32px color-mix(in srgb, var(--auth-dark) 40%, transparent);
+}
+
+.nucleus {
+  --auth-accent: hsl(from var(--accent) calc(h + 15) s 48%);
+}
+
+.story {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 640px;
+  overflow: hidden;
+  padding: 32px;
+  background: linear-gradient(155deg, color-mix(in srgb, var(--danger) 30%, var(--auth-dark)), var(--auth-dark));
+  color: var(--auth-light);
+}
+
+.brand {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 750;
+  letter-spacing: -0.05em;
+  text-decoration: none;
+}
+
+.mark {
+  width: 22px;
+  height: 22px;
+  border: 6px solid currentColor;
+  border-radius: 8px 8px 3px 8px;
+  transform: rotate(-12deg);
+}
+
+.storyCopy {
+  position: relative;
+  z-index: 2;
+  margin-top: 300px;
+}
+
+.eyebrow {
+  margin-bottom: 14px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.15em;
+}
+
+.storyTitle {
+  max-width: 340px;
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.storyDetail {
+  max-width: 300px;
+  margin-top: 16px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.surface {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  padding: 44px clamp(24px, 4vw, 60px) 24px;
+}
+
+.content {
+  width: 100%;
+  max-width: 370px;
+  margin: auto 0;
+}
+
+.lead {
+  margin-bottom: 10px;
+  color: var(--auth-accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.title {
+  font-size: clamp(27px, 3vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.note {
+  margin: 14px 0 28px;
+  color: var(--auth-muted);
+  font-size: 14px;
+}
+
+.notices {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.notices:empty {
+  display: none;
+}
+
+.footer {
+  margin-top: 36px;
+  color: var(--auth-muted);
+  font-size: 11px;
+}
+
+.surface :global(.ui-field__label) {
+  color: var(--auth-muted);
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.surface :global(.ui-input) {
+  height: 52px;
+  border-color: var(--auth-border);
+  border-radius: 10px;
+  padding: 0 15px;
+  background: var(--auth-input);
+  color: var(--auth-foreground);
+}
+
+.surface :global(.ui-input:focus-visible) {
+  border-color: var(--auth-accent);
+  outline: 3px solid color-mix(in srgb, var(--auth-accent) 25%, transparent);
+}
+
+.surface :global(.ui-input[aria-invalid="true"]) {
+  border-color: var(--auth-error);
+}
+
+.surface :global(.ui-field__error) {
+  color: var(--auth-error);
+}
+
+.surface :global(.ui-field__hint) {
+  color: var(--auth-muted);
+}
+
+.surface :global(.ui-button--primary) {
+  width: 100%;
+  height: 50px;
+  margin-top: 4px;
+  border-radius: 10px;
+  background: var(--auth-accent);
+  color: var(--auth-button-text);
+  font-size: 14px;
+}
+
+.surface :global(.ui-button--primary:hover:not(:disabled)) {
+  background: color-mix(in srgb, var(--auth-accent) 85%, var(--auth-dark));
+}
+
+.surface :global(.form-message--error) {
+  background: color-mix(in srgb, var(--auth-error) 6%, var(--auth-background));
+  color: var(--auth-error);
+}
+
+.surface :global(.form-message--success) {
+  background: color-mix(in srgb, var(--success) 10%, var(--auth-background));
+  color: var(--auth-foreground);
+}
+
+.surface :global(nav[aria-label="Λογαριασμός"]) {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.surface :global(nav[aria-label="Λογαριασμός"] a) {
+  color: var(--auth-accent);
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.surface :global(nav[aria-label="Λογαριασμός"] a:hover) {
+  text-decoration: underline;
+}
+
+.nucleus .surface :global(.ui-button--primary) {
+  border-radius: 100px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-bottom: 24px;
+  padding: 5px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--auth-foreground) 6%, var(--auth-background));
+  font-size: 13px;
+}
+
+.tabs a {
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--auth-muted);
+}
+
+.tabs a[aria-current="page"] {
+  background: var(--auth-background);
+  color: var(--auth-foreground);
+  box-shadow: var(--shadow);
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.window {
+  position: absolute;
+  left: 12%;
+  top: 15%;
+  width: 70%;
+  height: 50%;
+  border-radius: 160px 160px 0 0;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--auth-light) 32%, transparent), transparent 80%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--auth-light) 20%, transparent);
+  transform: rotate(-10deg);
+}
+
+.window::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--auth-light) 15%, transparent);
+}
+
+.laptop {
+  position: absolute;
+  left: 24%;
+  top: 27%;
+  width: 64%;
+  height: 25%;
+  border: 9px solid color-mix(in srgb, var(--auth-dark) 80%, var(--auth-light));
+  border-radius: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--auth-accent) 80%, var(--auth-dark)), var(--auth-dark));
+  box-shadow: 0 24px 36px color-mix(in srgb, var(--auth-dark) 50%, transparent);
+  transform: perspective(600px) rotateY(-24deg) rotateZ(-8deg);
+}
+
+.laptop::before {
+  content: "";
+  position: absolute;
+  inset: 22% 18%;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--auth-light) 30%, transparent);
+  background: repeating-linear-gradient(transparent 0 12px, color-mix(in srgb, var(--auth-light) 25%, transparent) 12px 14px);
+}
+
+.laptop::after {
+  content: "";
+  position: absolute;
+  left: -15%;
+  right: -15%;
+  bottom: -17px;
+  height: 10px;
+  border-radius: 0 0 20px 20px;
+  background: color-mix(in srgb, var(--auth-light) 60%, var(--auth-dark));
+}
+
+.spark, .sparkTwo {
+  position: absolute;
+  top: 20%;
+  right: 12%;
+  width: 7px;
+  height: 7px;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.sparkTwo {
+  top: 55%;
+  right: auto;
+  left: 15%;
+  width: 4px;
+  height: 4px;
+}
+
+.vault, .dune, .duneBack, .dots {
+  display: none;
+}
+
+.smartSave {
+  grid-template-columns: 1fr 1fr;
+  border-radius: 8px;
+}
+
+.smartSave .story {
+  order: 2;
+  color: var(--auth-dark);
+  background: radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--auth-accent) 8%, var(--auth-light)), color-mix(in srgb, var(--auth-accent) 38%, var(--auth-light)));
+}
+
+.smartSave .surface {
+  padding-top: 48px;
+  padding-bottom: 28px;
+}
+
+.smartSave .storyCopy {
+  margin-top: 330px;
+}
+
+.smartSave .storyTitle {
+  font-size: 30px;
+}
+
+.smartSave .window, .smartSave .laptop {
+  display: none;
+}
+
+.smartSave .vault {
+  display: block;
+  position: absolute;
+  top: 25%;
+  left: 21%;
+  width: 60%;
+  aspect-ratio: 1;
+  border: 12px solid color-mix(in srgb, var(--auth-accent) 55%, var(--auth-light));
+  border-radius: 30px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--auth-accent) 90%, var(--auth-dark)), color-mix(in srgb, var(--auth-accent) 45%, var(--auth-dark)));
+  transform: perspective(700px) rotateY(-24deg) rotateX(8deg);
+  box-shadow: 24px 25px 0 color-mix(in srgb, var(--auth-accent) 45%, var(--auth-light)), 35px 50px 45px color-mix(in srgb, var(--auth-accent) 25%, transparent), inset 0 0 0 7px color-mix(in srgb, var(--auth-dark) 20%, transparent);
+}
+
+.wheel {
+  position: absolute;
+  top: 30%;
+  left: 10%;
+  width: 40%;
+  aspect-ratio: 1;
+  border: 12px solid color-mix(in srgb, var(--success) 50%, var(--auth-light));
+  border-radius: 50%;
+  background: var(--auth-accent);
+  box-shadow: 4px 8px 0 color-mix(in srgb, var(--auth-dark) 25%, transparent);
+}
+
+.wheel::after {
+  content: "";
+  position: absolute;
+  inset: 25%;
+  border: 5px solid color-mix(in srgb, var(--auth-light) 60%, var(--auth-accent));
+  border-radius: 50%;
+}
+
+.handle {
+  position: absolute;
+  top: 30%;
+  right: 18%;
+  width: 6px;
+  height: 40%;
+  border-radius: 10px;
+  background: var(--auth-light);
+  box-shadow: 4px 3px 0 color-mix(in srgb, var(--auth-dark) 30%, transparent);
+}
+
+.smartSave .lead {
+  color: var(--auth-muted);
+}
+
+.midnight {
+  --auth-background: color-mix(in srgb, var(--auth-dark) 90%, var(--auth-accent));
+  --auth-foreground: var(--auth-light);
+  --auth-input: color-mix(in srgb, var(--auth-light) 8%, var(--auth-background));
+  --auth-accent: hsl(from var(--accent) calc(h + 20) s 74%);
+  --auth-button-text: var(--auth-dark);
+  --auth-error: color-mix(in srgb, var(--danger) 65%, var(--auth-light));
+  grid-template-columns: 1fr 1fr;
+  padding: 14px;
+  border-radius: 24px;
+}
+
+.midnight .story {
+  min-height: 630px;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at 35% 10%, color-mix(in srgb, var(--auth-accent) 60%, var(--auth-dark)), var(--auth-dark) 90%);
+}
+
+.midnight .storyCopy {
+  margin-top: 330px;
+  margin-bottom: 36px;
+}
+
+.midnight .storyTitle {
+  font-weight: 450;
+  font-size: 36px;
+}
+
+.midnight .window, .midnight .laptop {
+  display: none;
+}
+
+.midnight .dune {
+  display: block;
+  position: absolute;
+  top: 38%;
+  left: -30%;
+  width: 160%;
+  height: 70%;
+  border-radius: 90% 0 0 0;
+  transform: rotate(-20deg);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--auth-accent) 55%, var(--auth-dark)), var(--auth-dark) 66%);
+  box-shadow: -2px -2px 0 color-mix(in srgb, var(--auth-light) 12%, transparent);
+}
+
+.midnight .duneBack {
+  display: block;
+  position: absolute;
+  top: 66%;
+  right: -45%;
+  width: 150%;
+  height: 60%;
+  border-radius: 100% 0 0 0;
+  transform: rotate(20deg);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--auth-accent) 25%, var(--auth-dark)), var(--auth-dark) 65%);
+}
+
+.midnight .dots {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+  bottom: 25px;
+  left: 32px;
+}
+
+.dots span {
+  width: 22px;
+  height: 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--auth-light) 30%, transparent);
+}
+
+.dots span:last-child {
+  background: var(--auth-light);
+}
+
+.midnight .surface {
+  padding-right: 30px;
+  padding-left: 40px;
+}
+
+.midnight .surface :global(.ui-input) {
+  border-color: transparent;
+}
+
+.midnight .surface :global(.ui-input:focus-visible) {
+  border-color: var(--auth-accent);
+}
+
+.midnight .surface :global(.ui-input[aria-invalid="true"]) {
+  border-color: var(--auth-error);
+}
+
+@media (max-width: 720px) {
+  .screen, .smartSave, .midnight {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .story, .midnight .story {
+    min-height: 220px;
+    padding: 24px;
+  }
+  .storyCopy, .smartSave .storyCopy, .midnight .storyCopy {
+    margin: 28px 0 0;
+    max-width: 65%;
+  }
+  .storyTitle, .smartSave .storyTitle, .midnight .storyTitle {
+    font-size: 25px;
+  }
+  .storyDetail, .eyebrow, .footer, .midnight .dots {
+    display: none;
+  }
+  .surface, .midnight .surface {
+    padding: 32px 24px;
+  }
+  .smartSave .story {
+    order: 0;
+  }
+  .smartSave .vault {
+    width: 25%;
+    left: auto;
+    right: 8%;
+    top: 28%;
+    border-width: 7px;
+    border-radius: 14px;
+    box-shadow: 10px 10px 0 color-mix(in srgb, var(--auth-accent) 45%, var(--auth-light));
+  }
+  .wheel {
+    border-width: 6px;
+  }
+  .window {
+    left: auto;
+    right: 5%;
+    top: 5%;
+    width: 38%;
+    height: 90%;
+  }
+  .laptop {
+    left: auto;
+    right: 5%;
+    top: 35%;
+    width: 30%;
+    height: 40%;
+    border-width: 5px;
+  }
+  .title {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 380px) {
+  .story, .midnight .story {
+    padding: 20px;
+  }
+  .surface, .midnight .surface {
+    padding: 28px 18px;
+  }
+  .midnight {
+    padding: 8px;
+  }
+}

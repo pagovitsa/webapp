@@ -32,10 +32,20 @@
 | Σημείο | Δημόσιο |
 |---|---|
 | server.ts | registerUser, signIn, signOut, getCurrentUser, requestPasswordReset, resetPassword, handleAuthRequest, UserError |
-| contracts.ts | UserProfile, RegisterUserInput, SignInInput, PasswordResetInput, AuthMode, AuthField, AuthValues, AuthState |
-| presentation/components/ | AuthForm, UserAccount |
+| contracts.ts | UserProfile, RegisterUserInput, SignInInput, PasswordResetInput, AuthMode, AuthField, AuthValues, AuthState, AuthAppearance |
+| presentation/components/ | AuthForm, AuthScreen, UserAccount |
 
 ## Εξαρτήσεις
+
+### Εμφανίσεις ταυτοποίησης
+
+Οι `nucleus`, `smart-save` και `midnight` είναι τρεις ονομαστικές εμφανίσεις της ίδιας φόρμας για σύνδεση, εγγραφή, αίτηση ανάκτησης και ορισμό νέου κωδικού. Η ενεργή εμφάνιση επιλέγεται μόνο στον κώδικα, από το `presentation/auth-appearance.ts`. Η προεπιλογή είναι `smart-save`, κατόπιν επιλογής του χρήστη. Κάθε σελίδα συνθέτει το δημόσιο `AuthScreen`, που δέχεται επίσης ρητά `appearance` όταν χρειάζεται προεπισκόπηση. Δεν προστίθεται επιλογέας εμφάνισης στις πραγματικές φόρμες.
+
+Τα styles και τα διακοσμητικά γραφικά είναι τοπικά CSS Modules, με χρώματα από τα υπάρχοντα design tokens. Δεν φορτώνονται assets από τρίτους κατά την επίσκεψη. Διατηρούνται τα ελληνικά κείμενα, τα labels/μηνύματα, τα Server Actions και όλοι οι κανόνες ταυτοποίησης. Τα σχέδια προσαρμόζονται στις υπάρχουσες λειτουργίες· δεν προστίθενται μη λειτουργικά κουμπιά social login ή αλλαγή πολιτικής συνεδριών.
+
+Προεπισκοπήσεις: `/users/previews/nucleus`, `/users/previews/smart-save`, `/users/previews/midnight`. Κάθε σελίδα δείχνει τα τέσσερα αντίστοιχα forms για οπτικό έλεγχο, με μη ενεργές υποβολές ώστε να μη δημιουργούνται λογαριασμοί ή συνεδρίες κατά την προεπισκόπηση. Η ενεργή εμφάνιση της κανονικής σύνδεσης δεν επηρεάζεται από URL, cookie ή προτίμηση browser.
+
+Αναφορές: [Nucleus UI](https://dribbble.com/shots/25536172-Login-Register-Page-Nucleus-UI), [Smart Save](https://dribbble.com/shots/20624802-Login-Page-Smart-Save), [Dark Mode](https://dribbble.com/shots/24552589-Login-Sign-up-Dark-Mode-UI-UX-Design). Οι προσαρμογές διατηρούν τη λογική της διάταξης, με δικά μας CSS γραφικά και ονομασία εφαρμογής.
 
 Κανένα άλλο module. Οι adapters χρησιμοποιούν Better Auth, Prisma/MySQL και τον κοινό SMTP connector του `src/server/email`. Οι κωδικοί αποθηκεύονται ως μονόδρομα hashes από τη βιβλιοθήκη. Το cookie περιέχει μόνο τυχαίο αναγνωριστικό συνεδρίας: HttpOnly, SameSite=Lax, Secure μέσω HTTPS. Η συνεδρία λήγει σε επτά ημέρες, ανανεώνεται μετά από μία ημέρα ενεργής χρήσης και η cookie cache απενεργοποιείται για άμεση ανάκληση. Η σύγκριση session/reset tokens στη MySQL είναι case-sensitive μέσω migration.
 
@@ -101,7 +111,7 @@ npm run test:e2e
 
 ## Επανάληψη έναντι παραβίασης κανόνα
 
-Η αποσύνδεση χωρίς συνεδρία είναι ασφαλής επανάληψη. Διπλή εγγραφή και άκυρα credentials/tokens επιστρέφουν ελεγχόμενο μήνυμα. Τεχνικά σφάλματα αποθήκευσης/SMTP δεν καταπίνονται και δεν καταγράφουν κωδικούς, cookies ή συνδέσμους με tokens.
+Η αποσύνδεση χωρίς συνεδρία είναι ασφαλής επανάληψη. Διπλή εγγραφή και άκυρα credentials/tokens επιστρέφουν ελεγχόμενο μήνυμα. Τεχνικά σφάλματα αποθήκευσης/SMTP δεν καταπίνονται και δεν καταγράφουν κωδικούς, cookies ή συνδέσμους με tokens. Ένα αυστηρό before-hook απαιτεί επιτυχή διαγραφή της συνεδρίας πριν το built-in logout διαγράψει το cookie: αποτυχία ανάκλησης επιστρέφει 503 και διατηρεί το cookie για επανάληψη. Οι έλεγχοι origin/CSRF παραμένουν ενεργοί και προηγούνται της ανάκλησης. Το hook καλύπτεται από απομονωμένες δοκιμές με πραγματικό HTTP handler της βιβλιοθήκης και προσομοιωμένη αποτυχία αποθήκευσης.
 
 ## Ανοιχτά θέματα
 

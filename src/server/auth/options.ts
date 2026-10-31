@@ -6,6 +6,7 @@ import type { PrismaClient } from "../../../.generated/prisma/client";
 import { z } from "zod";
 import { env } from "../env";
 import { sendEmail } from "../email";
+import { requireSessionRevocation } from "./require-session-revocation";
 
 export function authOrigin(): string {
   const url = new URL(env.AUTH_URL);
@@ -22,6 +23,7 @@ export function createAuthOptions(database: PrismaClient) {
   return {
     appName: "webapp", database: prismaAdapter(database, { provider: "mysql", transaction: true }), baseURL, secret: env.AUTH_SECRET,
     trustedOrigins: [baseURL],
+    hooks: { before: requireSessionRevocation },
     emailAndPassword: {
       enabled: true, minPasswordLength: 12, maxPasswordLength: 128,
       autoSignIn: false, requireEmailVerification: true, revokeSessionsOnPasswordReset: true,
@@ -40,7 +42,7 @@ export function createAuthOptions(database: PrismaClient) {
       lastName: { type: "string" as const, required: false, defaultValue: "", validator: { input: profileField } },
     } },
     session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24, cookieCache: { enabled: false } },
-    advanced: { useSecureCookies: baseURL.startsWith("https:"), defaultCookieAttributes: { httpOnly: true, sameSite: "lax" as const } },
+    advanced: { disableOriginCheck: false, disableCSRFCheck: false, useSecureCookies: baseURL.startsWith("https:"), defaultCookieAttributes: { httpOnly: true, sameSite: "lax" as const } },
     rateLimit: { enabled: true, storage: "database" as const, window: 60, max: 100,
       customRules: { "/sign-in/username": { window: 60, max: 10 }, "/request-password-reset": { window: 60, max: 5 } } },
     plugins: [username({ minUsernameLength: 3, maxUsernameLength: 30 })],
