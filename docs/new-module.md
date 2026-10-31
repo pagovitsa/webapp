@@ -53,7 +53,7 @@ npm run module:new -- customers --page
 
 1. `README.md` του module — όλες οι ενότητες.
 2. Κώδικας με αυτή τη σειρά: domain → ports → use cases → infrastructure → contracts → `server.ts` → schemas → actions → components → σελίδα.
-3. Tests: `*.test.ts` δίπλα στο domain, στα schemas και στα use cases (Vitest)· `tests/e2e/<όνομα>.spec.ts` για την κύρια ροή (Playwright). Παράδειγμα: τα tests του `orders`.
+3. Tests: `*.test.ts` δίπλα στο domain, στα schemas και στα use cases (Vitest)· `tests/e2e/<όνομα>.spec.ts` για την κύρια ροή (Playwright). Παράδειγμα: τα tests του `users` με fake `IdentityGateway` και οι πραγματικές ροές στο `tests/e2e/users.spec.ts`.
 4. `<NavLink href="/<όνομα>">` στο `src/app/layout.tsx`, αν υπάρχει σελίδα.
 5. Σβήσε φακέλους που έμειναν μόνο με `.gitkeep`.
 6. `npm run check` και `npm run test:e2e`.
@@ -62,7 +62,9 @@ npm run module:new -- customers --page
 
 Κανόνες για branches, commits και pull requests: `AGENTS.md` §8.
 
-Θέση κάθε αρχείου: `src/modules/orders/`. Κανόνες ανά αρχείο: `AGENTS.md` §3–§4.
+Υλοποιημένη αναφορά ευθυνών: `src/modules/users/`. Ο generator παραμένει η αφετηρία κάθε νέου module· ο κώδικας ταυτοποίησης δεν αντιγράφεται. Κανόνες ανά αρχείο: `AGENTS.md` §3–§4.
+
+Η MySQL και το κοινό SMTP είναι ήδη διαθέσιμα στο `src/server/`. Ο νέος adapter χρησιμοποιεί τον κοινό Prisma client και συνοδεύεται από migration αν αλλάζει δεδομένα. Για ιδιωτικές πράξεις και αναγνώσεις, ορισμός ταυτότητας/δικαιωμάτων στο application μέσω port· οι υλοποιήσεις χρησιμοποιούν το δημόσιο `users/server.ts` όπου χρειάζεται. Νέα ενότητα δεν γίνεται αυτόματα προστατευμένη επειδή υπάρχει σύστημα χρηστών.
 
 ## 4. Τι ελέγχεται αυτόματα
 

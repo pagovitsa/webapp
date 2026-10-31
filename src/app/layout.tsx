@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "webapp", template: "%s · webapp" },
-  description: "Next.js App Router με δομή DDD",
+  description: "Εγγραφή, σύνδεση και διαχείριση του λογαριασμού σου στο webapp.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -20,7 +20,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <nav className="site-nav" aria-label="Κύρια πλοήγηση">
               <NavLink href="/">Αρχική</NavLink>
-              <NavLink href="/orders">Παραγγελίες</NavLink>
               <NavLink href="/users">Λογαριασμός</NavLink>
             </nav>
           </div>

@@ -64,6 +64,21 @@ test("anonymous users cannot read a profile", async ({ page }) => {
   expect((await page.request.get("/api/users/me")).status()).toBe(401);
 });
 
+test("home leads to the users flows and the old demo route is absent", async ({ page, request }) => {
+  await page.goto("/");
+  const main = page.getByRole("main");
+  await expect(main.getByRole("heading", { level: 1 })).toHaveText("Ο λογαριασμός σου. Ο χώρος σου.");
+  await page.setViewportSize({ width: 320, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(page.getByRole("link", { name: "Παραγγελίες", exact: true })).toHaveCount(0);
+  await main.getByRole("link", { name: "Σύνδεση", exact: true }).click();
+  await expect(page).toHaveURL(/\/users\/login$/);
+  await page.goto("/");
+  await page.getByRole("main").getByRole("link", { name: "Δημιουργία λογαριασμού", exact: true }).click();
+  await expect(page).toHaveURL(/\/users\/register$/);
+  expect((await request.get("/orders")).status()).toBe(404);
+});
+
 test("registration schema and domain failures are accessible", async ({ page }) => {
   await page.goto("/users/register");
   await page.getByRole("button", { name: "Δημιουργία λογαριασμού" }).click();
