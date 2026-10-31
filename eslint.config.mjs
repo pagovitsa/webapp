@@ -27,6 +27,14 @@ const moduleInternals = internalPaths.flatMap((path) => [
 // δεν εξαρτώνται από αυτό: η κατεύθυνση είναι server.ts → application → domain.
 const compositionRoot = ["../server", "../../server", "../../../server", "@/modules/*/server", "**/modules/*/server"];
 
+// Πυρήνας του ίδιου module, με relative path από το presentation/.
+const ownModuleCore = ["domain", "application", "infrastructure"].flatMap((dir) => [
+  `../${dir}`,
+  `../../${dir}`,
+  `../../../${dir}`,
+  `**/${dir}/**`,
+]);
+
 // Μέσα σε ένα module τα δικά του αρχεία εισάγονται με relative path.
 // Το alias @/modules/... προς εσωτερικά δείχνει import από άλλο module.
 const otherModuleInternals = moduleInternals.filter((p) => p.startsWith("@/"));
@@ -81,6 +89,30 @@ const eslintConfig = [
         {
           group: ["./presentation", "./presentation/**", "**/presentation/**", "@/shared/ui/**"],
           message: "Το server.ts δεν εισάγει actions ή UI· τα actions καλούν το server.ts.",
+        },
+        { group: otherModuleInternals, message: "Χρησιμοποίησε τα δημόσια σημεία του άλλου module (server.ts, contracts.ts)." },
+      ),
+    },
+  },
+  {
+    // Το presentation φτάνει στη λογική μόνο μέσω server.ts (actions) και contracts.ts.
+    files: ["src/modules/*/presentation/**", "templates/module/presentation/**"],
+    rules: {
+      "no-restricted-imports": restrict(
+        { group: ownModuleCore, message: "Το presentation καλεί το ../server και χρησιμοποιεί τύπους του ../contracts." },
+        { group: otherModuleInternals, message: "Χρησιμοποίησε τα δημόσια σημεία του άλλου module (server.ts, contracts.ts)." },
+      ),
+    },
+  },
+  {
+    // Components και hooks: καλούν actions, όχι server.ts ή src/server.
+    files: ["src/modules/*/presentation/components/**", "src/modules/*/presentation/hooks/**"],
+    rules: {
+      "no-restricted-imports": restrict(
+        { group: ownModuleCore, message: "Το presentation καλεί το ../server και χρησιμοποιεί τύπους του ../contracts." },
+        {
+          group: [...compositionRoot, "@/server", "@/server/**"],
+          message: "Τα components καλούν actions· το server.ts και το src/server είναι μόνο για server κώδικα.",
         },
         { group: otherModuleInternals, message: "Χρησιμοποίησε τα δημόσια σημεία του άλλου module (server.ts, contracts.ts)." },
       ),

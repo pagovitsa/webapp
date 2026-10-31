@@ -65,7 +65,8 @@
 | `infrastructure/` | ports, domain, `src/server`, δημόσια σημεία άλλων modules | presentation |
 | `server.ts` | application, infrastructure, domain, contracts | presentation, `src/shared/ui`, `src/app` |
 | `presentation/actions.ts` | `../server`, `../contracts`, schemas | domain, application, infrastructure |
-| `presentation/components/`, `hooks/` | actions, contracts, schemas, `src/shared` | κάθε `server.ts`, `src/server` |
+| `presentation/components/`, `hooks/` | actions, contracts, schemas, `src/shared` | domain, application, infrastructure, κάθε `server.ts`, `src/server` |
+| `presentation/schemas/` | contracts | domain, application, infrastructure |
 | `src/app/` | `server.ts`, `contracts.ts`, δημόσια components των modules, `src/shared` | τα εσωτερικά των modules (παρακάτω) |
 | `src/shared/` | Μόνο γενικό κώδικα και βιβλιοθήκες | `src/modules`, `src/server` |
 

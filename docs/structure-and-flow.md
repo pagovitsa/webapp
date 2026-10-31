@@ -334,13 +334,15 @@ interface OrderRepository {
 | `src/modules/**` | τα εσωτερικά **άλλου** module μέσω `@/modules/...` | Μόνο τα δημόσια σημεία του άλλου module |
 | `modules/*/domain/**` | Next, React, `@/server`, `@/shared/ui`, application, infrastructure, presentation, `server.ts` (ίδιου ή άλλου module) | Το domain μένει καθαρό· το `server.ts` εξαρτάται από αυτό, όχι το αντίστροφο |
 | `modules/*/application/**` | Next, React, `@/server/database`, infrastructure, presentation, `server.ts` (ίδιου ή άλλου module) | Οι υλοποιήσεις συνδέονται στο `server.ts`· δεδομένα άλλου module μέσω port |
+| `modules/*/presentation/**` (actions, components, hooks, schemas) | domain, application, infrastructure του ίδιου module | Το presentation φτάνει στη λογική μόνο μέσω `server.ts`· τύπους παίρνει από το `contracts.ts` |
+| `modules/*/presentation/components/**`, `hooks/**` | κάθε `server.ts`, `@/server/**` | Τα components καλούν actions· ο server κώδικας μένει στον server |
 
 Επιπλέον, μόνο στο dependency-cruiser:
 
 | Κανόνας | Τι πιάνει |
 |---|---|
 | `no-circular` | Κυκλικές εξαρτήσεις, και μεταξύ modules (π.χ. `a/server.ts` → `b/server.ts` → `a/server.ts`). |
-| `client-not-to-server-only` | Components/hooks που εισάγουν `server.ts` ή `src/server`. |
+| `client-not-to-server-only` | Components/hooks που εισάγουν `server.ts` ή `src/server` (το ESLint το πιάνει επίσης). |
 | `not-to-unresolvable` | Imports που δεν αντιστοιχούν σε αρχείο. |
 
 | Περίπτωση | ESLint | dependency-cruiser |

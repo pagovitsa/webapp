@@ -80,6 +80,13 @@ module.exports = {
       to: { path: ["^src/modules/$1/presentation/", "^src/shared/ui/", "^src/app/"] },
     },
     {
+      name: "presentation-only-via-server",
+      severity: "error",
+      comment: "Το presentation φτάνει στη λογική μόνο μέσω server.ts και contracts.ts, όχι απευθείας σε domain, application ή infrastructure.",
+      from: { path: "^src/modules/([^/]+)/presentation/", pathNot: "\\.test\\.ts$" },
+      to: { path: "^src/modules/$1/(domain|application|infrastructure)/" },
+    },
+    {
       name: "client-not-to-server-only",
       severity: "error",
       comment: "Τα components δεν εισάγουν server.ts ή src/server· καλούν actions.",
