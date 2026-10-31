@@ -20,6 +20,15 @@ export const env = {
   get AUTH_SECRET() {
     return required("AUTH_SECRET");
   },
+  get AUTH_URL() {
+    return required("AUTH_URL");
+  },
+  get SMTP_URL() {
+    return required("SMTP_URL");
+  },
+  get SMTP_FROM() {
+    return required("SMTP_FROM");
+  },
   get LOG_LEVEL() {
     return optional("LOG_LEVEL", "info");
   },

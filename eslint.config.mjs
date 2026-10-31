@@ -64,7 +64,7 @@ const eslintConfig = [
   ...nextVitals,
   ...nextTs,
   {
-    ignores: [".next/**", "node_modules/**", "next-env.d.ts"],
+    ignores: [".next/**", ".generated/**", "node_modules/**", "next-env.d.ts"],
   },
   {
     // Οι σελίδες βλέπουν μόνο τα δημόσια σημεία των modules.
