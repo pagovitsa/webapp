@@ -15,6 +15,8 @@ const fixtureDirs = [
   "src/modules/zz-fx-b",
   "src/modules/zz-fx-c",
   "src/modules/zz-fx-d",
+  "src/modules/zz-fx-e",
+  "src/modules/zz-fx-f",
   "src/app/zz-fx",
   "src/shared/zz-fx",
 ];
@@ -33,6 +35,12 @@ const targets = {
   "src/modules/zz-fx-a/server.ts": "export const api = 1;",
   "src/modules/zz-fx-b/server.ts": "export const apiB = 1;",
   "src/modules/zz-fx-b/domain/x.ts": "export const x = 1;",
+  "src/modules/zz-fx-e/domain/x.ts": "export const ex = 1;",
+  "src/modules/zz-fx-e/application/x.ts": "export const eap = 1;",
+  "src/modules/zz-fx-e/infrastructure/x.ts": "export const ei = 1;",
+  "src/modules/zz-fx-f/server.ts": "export const apiF = 1;",
+  "src/modules/zz-fx-f/contracts.ts": "export type DtoF = { id: string };",
+  "src/modules/zz-fx-f/presentation/schemas/s.ts": "export const schemaF = 1;",
 };
 
 // dc: αναμενόμενος κανόνας dependency-cruiser (null = κανένας).
@@ -52,7 +60,11 @@ const cases = [
   { file: "src/modules/zz-fx-a/application/to-other-server.ts", src: 'export * from "@/modules/zz-fx-b/server";', dc: "application-no-implementations", eslint: true },
   { file: "src/modules/zz-fx-a/application/to-infrastructure.ts", src: 'export * from "../infrastructure/repo-impl";', dc: "application-no-implementations", eslint: true },
   { file: "src/modules/zz-fx-b/server.ts", src: 'export const apiB = 1;\nexport * from "./presentation/actions";', dc: "server-ts-no-presentation", eslint: true },
-  { file: "src/modules/zz-fx-a/presentation/components/to-server.ts", src: 'export * from "../../server";', dc: "client-not-to-server-only", eslint: false },
+  { file: "src/modules/zz-fx-a/presentation/components/to-server.ts", src: 'export * from "../../server";', dc: "client-not-to-server-only", eslint: true },
+  { file: "src/modules/zz-fx-e/presentation/actions.ts", src: 'export * from "../infrastructure/x";', dc: "presentation-only-via-server", eslint: true },
+  { file: "src/modules/zz-fx-e/presentation/actions-to-application.ts", src: 'export * from "../application/x";', dc: "presentation-only-via-server", eslint: true },
+  { file: "src/modules/zz-fx-e/presentation/components/to-domain.ts", src: 'export * from "../../domain/x";', dc: "presentation-only-via-server", eslint: true },
+  { file: "src/modules/zz-fx-e/presentation/schemas/to-domain.ts", src: 'export * from "../../domain/x";', dc: "presentation-only-via-server", eslint: true },
   // Ένας κύκλος αναφέρεται από ένα μόνο αρχείο του· ελέγχεται σε όλη την ομάδα.
   { file: "src/modules/zz-fx-c/server.ts", src: 'export * from "@/modules/zz-fx-d/server";', dc: "no-circular", eslint: false, cycle: "cd" },
   { file: "src/modules/zz-fx-d/server.ts", src: 'export const d = 1;\nexport * from "@/modules/zz-fx-c/server";', dc: "no-circular", eslint: false, cycle: "cd" },
@@ -61,6 +73,7 @@ const cases = [
   { file: "src/modules/zz-fx-a/presentation/components/ok.ts", src: 'export * from "../actions";\nexport * from "./internal/helper";\nexport * from "../schemas/s";', dc: null, eslint: false },
   { file: "src/modules/zz-fx-a/infrastructure/ok.ts", src: 'export * from "@/modules/zz-fx-b/server";\nexport type { Repo } from "../application/ports/repo";\nexport type { A } from "../domain/entity";', dc: null, eslint: false },
   { file: "src/modules/zz-fx-a/application/ok.ts", src: 'export type { Repo } from "./ports/repo";\nexport type { A } from "../domain/entity";', dc: null, eslint: false },
+  { file: "src/modules/zz-fx-f/presentation/actions.ts", src: 'export * from "../server";\nexport type { DtoF } from "../contracts";\nexport * from "./schemas/s";', dc: null, eslint: false },
   { file: "src/modules/zz-fx-b/ok.ts", src: 'export type { Dto } from "@/modules/zz-fx-a/contracts";\nexport * from "@/modules/zz-fx-a/presentation/components/public";', dc: null, eslint: false },
 ];
 

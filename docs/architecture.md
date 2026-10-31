@@ -57,6 +57,7 @@ modules/<name>/
 3. Pages και Route Handlers μένουν μικρά: συνθέτουν/χειρίζονται HTTP και καλούν το `server.ts`.
 4. Κάθε module εκθέτει μόνο: `server.ts` (server λειτουργίες), `contracts.ts` (types) και τα components που βρίσκονται απευθείας στο `presentation/components/` (καταγράφονται στον πίνακα «Δημόσιο API» του README του). Εσωτερικά: `presentation/actions.ts`, `presentation/hooks/`, `presentation/schemas/`, `presentation/components/internal/` (βοηθητικά components). Κανένα import σε εσωτερικά άλλου module.
 4α. Το `server.ts` συνδέει use cases με infrastructure και χρησιμοποιεί domain και contracts. Δεν εισάγει actions ή UI· τα actions καλούν αυτό. Το `domain/` και το `application/` **δεν** εισάγουν κανένα `server.ts` (ούτε του ίδιου ούτε άλλου module).
+4β. Το `presentation/` (actions, components, hooks, schemas) δεν εισάγει domain, application ή infrastructure, ούτε του ίδιου module. Τα actions καλούν το `../server`· τύποι έρχονται από το `../contracts`. Τα components και τα hooks δεν εισάγουν κανένα `server.ts` ούτε το `src/server`.
 5. Τα Server Actions ελέγχουν δεδομένα, ταυτότητα και δικαιώματα πριν εκτελέσουν την ενέργεια. Το ίδιο ισχύει για κάθε **ανάγνωση** προστατευμένων δεδομένων (π.χ. `listOrders()`), όχι μόνο για τις μεταβολές.
 6. Το `shared` μεγαλώνει μόνο με πραγματική κοινή χρήση και δεν εξαρτάται από `modules/` ή `server/`. Επιχειρησιακοί κανόνες μένουν στο module τους.
 7. Unit/integration tests (Vitest) μένουν δίπλα στον κώδικα (`*.test.ts`). Το `tests/e2e/` (Playwright) είναι για τις συνολικές ροές. Τα use cases ελέγχονται με fake του port, χωρίς infrastructure.
@@ -73,7 +74,7 @@ modules/<name>/
 
 ### Αυτόματος έλεγχος
 
-Οι κανόνες 1, 2, 4, 4α και 6 ελέγχονται από δύο εργαλεία:
+Οι κανόνες 1, 2, 4, 4α, 4β και 6 ελέγχονται από δύο εργαλεία:
 
 | Εργαλείο | Αρχείο | Τι προσφέρει |
 |---|---|---|
