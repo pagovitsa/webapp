@@ -47,6 +47,14 @@ async function ensureContainer(name, args) {
   }
 }
 
+function mysqlStartupFailure() {
+  const result = spawnSync(command, [...prefix, "logs", "--tail", "60", "webapp-mysql"], { encoding: "utf8", windowsHide: true, timeout: 10_000 });
+  const values = readFileSync(resolve(root, ".env.mysql.local"), "utf8").split(/\r?\n/).filter(Boolean).map(line => line.slice(line.indexOf("=") + 1));
+  // Initialization errors may echo SQL containing credentials; redact before reporting.
+  const details = values.reduce((text, value) => value ? text.replaceAll(value, "[REDACTED]") : text, `${result.stdout ?? ""}\n${result.stderr ?? ""}`);
+  return new Error(`MySQL did not become healthy. Existing data and credentials were preserved.\n${details}`);
+}
+
 export async function ensureDevelopmentServices() {
   const settings = getDevelopmentSettings();
   if (windows) {
@@ -78,8 +86,10 @@ export async function ensureDevelopmentServices() {
     "mysql:8.4.13", "--default-time-zone=+00:00",
   ]);
   const deadline = Date.now() + 120_000;
-  while (docker(["inspect", "webapp-mysql", "--format", "{{.State.Health.Status}}"]).trim() !== "healthy") {
-    if (Date.now() > deadline) throw new Error("MySQL did not become healthy. Existing data and credentials were preserved.");
+  while (true) {
+    const state = JSON.parse(docker(["inspect", "webapp-mysql", "--format", "{{json .State}}"]));
+    if (state.Health?.Status === "healthy") break;
+    if (["exited", "dead"].includes(state.Status) || Date.now() > deadline) throw mysqlStartupFailure();
     await setTimeout(1000);
   }
   await ensureContainer("webapp-mailpit", ["--publish", "127.0.0.1:12525:1025", "--publish", "127.0.0.1:18025:8025", "axllent/mailpit:v1.33.0"]);
