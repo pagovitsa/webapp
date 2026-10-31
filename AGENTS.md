@@ -41,6 +41,7 @@
 Μόνο όταν το αίτημα αφορά ρητά την ίδια τη βάση (κανόνες, templates, scripts, ρυθμίσεις, τεκμηρίωση).
 
 - Επιτρέπονται αλλαγές σε όλα τα αρχεία του πίνακα Α που είναι «Όχι», εκτός από νέες dependencies (χρειάζονται άδεια).
+- Ακολουθεί την ίδια ροή Git (§8), σε branch `starter/<περιγραφή>`.
 - ΠΡΕΠΕΙ: κάθε αλλαγή αρχιτεκτονικού κανόνα συνοδεύεται από ενημέρωση **και** του `eslint.config.mjs` **και** του `.dependency-cruiser.cjs`, περίπτωση στο `tests/architecture/boundaries.test.mjs` (μία που πρέπει να αποτυγχάνει, μία που πρέπει να περνά), και ενημέρωση του `docs/architecture.md`.
 - ΠΡΕΠΕΙ: κάθε αλλαγή στο `templates/` ή στο `scripts/new-module.mjs` συνοδεύεται από ενημέρωση του `tests/generator/`.
 
@@ -140,17 +141,20 @@
 - Χρήματα: ακέραιοι σε λεπτά. Ημερομηνίες: `Date` στο domain, ISO `string` στα DTOs.
 - Αποθήκευση: στη μνήμη μέχρι να επιλεγεί βάση.
 - Ταυτότητα χρήστη: δεν υπάρχει ακόμα· όταν προστεθεί, καλύπτει και τις αναγνώσεις.
+- Μηνύματα commit και τίτλοι pull request: αγγλικά. Περιγραφές pull request και τεκμηρίωση: ελληνικά.
 
 ---
 
 ## 6. Ροή νέου module
 
 1. Επιβεβαίωσε όνομα, οντότητες, κανόνες, use cases και αν χρειάζεται σελίδα (§2).
-2. `npm run module:new -- <όνομα>` (ή `-- <όνομα> --page`). **Μην** αντιγράφεις φακέλους με το χέρι και μην αντιγράφεις το `orders`.
-3. Συμπλήρωσε το `src/modules/<όνομα>/README.md`.
-4. Γράψε με αυτή τη σειρά: domain (+ tests) → ports → use cases (+ tests) → infrastructure → contracts → server.ts → schemas (+ tests) → actions → components → σελίδα → `<NavLink>` → e2e test.
-5. Σβήσε φακέλους που έμειναν μόνο με `.gitkeep` και τα `.gitkeep` φακέλων που απέκτησαν αρχεία.
-6. `npm run check` και, αν υπάρχει σελίδα, `npm run test:e2e`.
+2. `git switch main`, `git pull`, και μετά `git switch -c feature/<όνομα>-<περιγραφή>` (§8).
+3. `npm run module:new -- <όνομα>` (ή `-- <όνομα> --page`). **Μην** αντιγράφεις φακέλους με το χέρι και μην αντιγράφεις το `orders`.
+4. Συμπλήρωσε το `src/modules/<όνομα>/README.md`.
+5. Γράψε με αυτή τη σειρά: domain (+ tests) → ports → use cases (+ tests) → infrastructure → contracts → server.ts → schemas (+ tests) → actions → components → σελίδα → `<NavLink>` → e2e test. Commit μετά από κάθε λογικό βήμα που περνά το `npm run check`.
+6. Σβήσε φακέλους που έμειναν μόνο με `.gitkeep` και τα `.gitkeep` φακέλων που απέκτησαν αρχεία.
+7. `npm run check` και, αν υπάρχει σελίδα, `npm run test:e2e`.
+8. Push του branch, pull request με την περιγραφή του §8, έλεγχος ότι το CI πέρασε. Το merge το κάνει ο άνθρωπος.
 
 ---
 
@@ -165,7 +169,58 @@
 
 ---
 
-## 8. Ορισμός «ολοκληρώθηκε»
+## 8. Git και GitHub
+
+Repository: https://github.com/pagovitsa/webapp. Το `main` είναι πάντα σε κατάσταση που περνά το CI.
+
+### Branches
+
+- ΑΠΑΓΟΡΕΥΕΤΑΙ: commit ή push απευθείας στο `main`. Κάθε αλλαγή μπαίνει μέσω pull request.
+- Ένα branch ανά εργασία, από το πιο πρόσφατο `main`:
+
+| Τύπος εργασίας | Όνομα branch | Παράδειγμα |
+|---|---|---|
+| Νέο module ή λειτουργία | `feature/<module>-<περιγραφή>` | `feature/customers-create` |
+| Διόρθωση | `fix/<module>-<περιγραφή>` | `fix/orders-amount-parsing` |
+| Συντήρηση starter | `starter/<περιγραφή>` | `starter/git-workflow` |
+
+- Ένα module = ένα branch = ένα pull request. Μην ανακατεύεις δύο modules ή module και συντήρηση starter στο ίδιο branch.
+
+### Commits
+
+- ΠΡΕΠΕΙ: πριν από κάθε commit περνά το `npm run check` (και το `npm run test:e2e` αν άλλαξε σελίδα ή ροή).
+- Μικρά commits, ένα λογικό βήμα το καθένα (π.χ. «domain και tests», «use cases», «σελίδα και e2e»).
+- Μήνυμα: πρώτη γραμμή στην προστακτική, έως 72 χαρακτήρες, στα αγγλικά (όπως το υπάρχον ιστορικό). Κενή γραμμή, και μετά το **γιατί** αν δεν είναι προφανές.
+  - `Add customers domain with email and status rules`
+  - `Fix amount parsing for values with thousands separator`
+- Η ταυτότητα συγγραφέα είναι ρυθμισμένη τοπικά στο repository (`git config user.*`). ΑΠΑΓΟΡΕΥΕΤΑΙ: αλλαγή της global ρύθμισης git του χρήστη.
+
+### Pull requests
+
+- Τίτλος: όπως ένα μήνυμα commit.
+- Περιγραφή, με αυτές τις ενότητες:
+  1. **Τι** — τι αλλάζει, σε 1–3 γραμμές.
+  2. **Γιατί** — το αίτημα ή το πρόβλημα.
+  3. **Έλεγχοι** — αποτέλεσμα `npm run check`, `npm run test:e2e`, τι δοκιμάστηκε στον browser και τι όχι.
+  4. **Υποθέσεις / ανοιχτά θέματα** — ό,τι γράφτηκε στο README του module.
+- ΠΡΕΠΕΙ: το CI του pull request να είναι πράσινο πριν από το merge. Αν αποτύχει, διορθώνεις στο ίδιο branch με νέο commit.
+- Το **merge το κάνει ο άνθρωπος**. Agent κάνει merge μόνο με ρητή άδεια για το συγκεκριμένο pull request.
+
+### Απαγορεύσεις
+
+- `git push --force` στο `main`, ή αλλαγή ιστορικού (rebase, amend, reset) σε commits που έχουν γίνει push σε κοινόχρηστο branch.
+- `--no-verify` ή παράκαμψη ελέγχων.
+- Commit αρχείων `.env*` (εκτός `.env.example`), `node_modules/`, `.next/`, `test-results/`, `playwright-report/`, μυστικών ή κλειδιών.
+- Διαγραφή branches ή tags άλλων.
+
+### Εκδόσεις του starter
+
+- Tags `starter-vN` μόνο σε εργασία συντήρησης starter, σε commit του `main` που πέρασε το CI, και μόνο αφού το ζητήσει ο άνθρωπος.
+- Annotated tag (`git tag -a`) με σύντομη περιγραφή του τι άλλαξε από την προηγούμενη έκδοση.
+
+---
+
+## 9. Ορισμός «ολοκληρώθηκε»
 
 - [ ] `npm run check` περνά (typecheck → lint → arch → test → build) χωρίς σφάλματα και νέα warnings.
 - [ ] Υπάρχουν τα tests του §4 και, αν υπάρχει σελίδα, το `npm run test:e2e` περνά.
@@ -174,5 +229,7 @@
 - [ ] Δεν έμειναν άδειοι φάκελοι με `.gitkeep`.
 - [ ] Δεν άλλαξε τίποτα εκτός του scope του τύπου εργασίας (§1).
 - [ ] Αν υπάρχει σελίδα: δοκιμή στον browser (`npm run dev`) για επιτυχία, σφάλμα schema, σφάλμα domain.
+- [ ] Η δουλειά είναι σε δικό της branch (§8), με commits που έγιναν push.
+- [ ] Υπάρχει pull request με την περιγραφή του §8, και το CI του είναι πράσινο.
 
-Στην τελική αναφορά γράψε: τα αρχεία που δημιουργήθηκαν/άλλαξαν, το αποτέλεσμα του `npm run check`, τι δοκιμάστηκε στον browser και τι όχι, τις υποθέσεις που έκανες.
+Στην τελική αναφορά γράψε: τα αρχεία που δημιουργήθηκαν/άλλαξαν, το αποτέλεσμα του `npm run check`, τι δοκιμάστηκε στον browser και τι όχι, τις υποθέσεις που έκανες, το branch και το link του pull request με την κατάσταση του CI.

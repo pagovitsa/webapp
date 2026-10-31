@@ -31,6 +31,12 @@ npm run dev
 
 Σε κάθε pull request (`.github/workflows/check.yml`): `npm ci` → `npm run check` → `npm run test:e2e`.
 
+## Ροή εργασίας
+
+- Καμία αλλαγή απευθείας στο `main`. Κάθε εργασία σε δικό της branch (`feature/…`, `fix/…`, `starter/…`) και pull request.
+- Merge μόνο όταν το CI του pull request είναι πράσινο.
+- Λεπτομέρειες: [AGENTS.md](AGENTS.md) §8.
+
 ## Τεκμηρίωση
 
 | Αρχείο | Περιεχόμενο |

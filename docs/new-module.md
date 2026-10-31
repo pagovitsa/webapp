@@ -14,6 +14,22 @@
 
 ## 2. Δημιουργία
 
+Πρώτα ένα branch από το πιο πρόσφατο `main`:
+
+```bash
+git switch main
+```
+
+```bash
+git pull
+```
+
+```bash
+git switch -c feature/customers-create
+```
+
+Μετά ο σκελετός:
+
 ```bash
 npm run module:new -- customers
 ```
@@ -41,6 +57,10 @@ npm run module:new -- customers --page
 4. `<NavLink href="/<όνομα>">` στο `src/app/layout.tsx`, αν υπάρχει σελίδα.
 5. Σβήσε φακέλους που έμειναν μόνο με `.gitkeep`.
 6. `npm run check` και `npm run test:e2e`.
+7. Commit (μικρά, ένα λογικό βήμα το καθένα), push του branch, pull request στο GitHub. Το πρότυπο της περιγραφής συμπληρώνεται αυτόματα.
+8. Merge όταν το CI του pull request είναι πράσινο.
+
+Κανόνες για branches, commits και pull requests: `AGENTS.md` §8.
 
 Θέση κάθε αρχείου: `src/modules/orders/`. Κανόνες ανά αρχείο: `AGENTS.md` §3–§4.
 
