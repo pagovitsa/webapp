@@ -1,44 +1,50 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { buttonClass } from "@/shared/ui/button";
 import { Card } from "@/shared/ui/card";
+
+export const metadata: Metadata = { title: "Αρχική" };
 
 export default function HomePage() {
   return (
     <div className="page">
       <section className="hero">
-        <p className="eyebrow">Next.js · TypeScript · DDD</p>
-        <h1 className="hero__title">Μία ενότητα, μία θέση για κάθε κομμάτι κώδικα.</h1>
+        <p className="eyebrow">Καλώς ήρθες στο webapp</p>
+        <h1 className="hero__title">Ο λογαριασμός σου. Ο χώρος σου.</h1>
         <p className="hero__lead">
-          Κάθε επιχειρησιακή ενότητα έχει domain, application, infrastructure και presentation. Οι σελίδες συνθέτουν,
-          τα modules αποφασίζουν.
+          Συνδέσου για να δεις τα στοιχεία σου ή δημιούργησε έναν νέο λογαριασμό.
         </p>
         <div className="hero__actions">
-          <Link href="/orders" className={buttonClass()}>
-            Άνοιξε τις παραγγελίες
+          <Link href="/users/login" className={buttonClass()}>
+            Σύνδεση
+          </Link>
+          <Link href="/users/register" className={buttonClass("secondary")}>
+            Δημιουργία λογαριασμού
           </Link>
         </div>
       </section>
 
       <div className="grid-3">
-        <Card title="Παραγγελίες" description="Δοκιμαστικό module για τη δομή.">
+        <Card title="Ο λογαριασμός μου" description="Τα στοιχεία σου, σε ένα μέρος.">
           <p className="muted">
-            Φόρμα με Server Action, έλεγχος schema, κανόνες στο domain και αποθήκευση πίσω από ένα port.
+            Δες το προφίλ σου αφού συνδεθείς στον λογαριασμό σου.
           </p>
-          <Link href="/orders" className={buttonClass("secondary", "sm")}>
-            Προβολή
+          <Link href="/users" className={buttonClass("secondary", "sm")}>
+            Προβολή λογαριασμού
           </Link>
         </Card>
-        <Card title="Νέα ενότητα" description="Αντέγραψε το templates/module.">
+        <Card title="Επιβεβαίωση email" description="Ολοκλήρωσε την εγγραφή σου.">
           <p className="muted">
-            Βάλε το αντίγραφο στο <code>src/modules/&lt;όνομα&gt;</code>, γράψε πρώτα το domain και σύνδεσε τις υλοποιήσεις στο{" "}
-            <code>server.ts</code>.
+            Μετά την εγγραφή θα λάβεις έναν σύνδεσμο επιβεβαίωσης για να ενεργοποιήσεις την πρόσβασή σου.
           </p>
         </Card>
-        <Card title="Όρια" description="Τα ελέγχει το ESLint.">
+        <Card title="Ανάκτηση πρόσβασης" description="Ξέχασες τον κωδικό σου;">
           <p className="muted">
-            Το <code>app/</code> βλέπει μόνο <code>server.ts</code>, <code>contracts.ts</code> και{" "}
-            <code>presentation/</code>. Το domain μένει καθαρό TypeScript.
+            Ζήτησε οδηγίες στο email σου και όρισε έναν νέο κωδικό.
           </p>
+          <Link href="/users/forgot-password" className={buttonClass("secondary", "sm")}>
+            Ανάκτηση κωδικού
+          </Link>
         </Card>
       </div>
     </div>

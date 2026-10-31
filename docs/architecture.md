@@ -15,9 +15,10 @@ Next.js App Router + TypeScript, οργανωμένο κατά DDD: πρώτα �
 
 ### `server/` έναντι `infrastructure/`
 
-- `src/server/database/` δημιουργεί και διαχειρίζεται τον κοινό database client.
+- `src/server/database/` δημιουργεί και διαχειρίζεται τον κοινό Prisma client για MySQL. Το schema και τα migrations βρίσκονται στο `prisma/`.
 - `modules/<x>/infrastructure/persistence/` χρησιμοποιεί αυτόν τον client για τα δεδομένα της ενότητας.
-- `src/server/auth/` χειρίζεται το session. Οι αποφάσεις δικαιωμάτων («μπορεί αυτός ο χρήστης να εγκρίνει αυτή την παραγγελία;») ανήκουν στο module.
+- `src/server/auth/` δημιουργεί το Better Auth και χειρίζεται συνεδρίες, cookies και ασφαλή ανάκληση. Οι αποφάσεις δικαιωμάτων για τις πράξεις κάθε ενότητας ανήκουν στο αντίστοιχο module.
+- `src/server/email/` παρέχει κοινή αποστολή SMTP. Το Mailpit χρησιμοποιείται μόνο για τοπική σύλληψη email.
 
 ## Πρότυπο module
 
@@ -41,14 +42,15 @@ modules/<name>/
 
 Το κενό πρότυπο βρίσκεται στο `templates/module/` (εκτός `src/modules/`, όπου μένουν μόνο πραγματικές ενότητες). Νέο module δημιουργείται με `npm run module:new -- <όνομα>` (δες `docs/new-module.md`). Οι φάκελοι με `.gitkeep` είναι προαιρετικοί· σβήσε όσους δεν χρειάζεσαι.
 
-Το `orders` είναι **δοκιμαστική ενότητα** που δείχνει πού μπαίνει κάθε αρχείο (σελίδα `/orders`). Δεν είναι πρότυπο για αποθήκευση, ταυτόχρονες αλλαγές ή auth — δες το `docs/structure-and-flow.md` §9.
+Το `users` είναι η υλοποιημένη ενότητα χρηστών: εγγραφή, επιβεβαίωση email, σύνδεση, προφίλ, αποσύνδεση και ανάκτηση κωδικού. Χρησιμοποιεί port `IdentityGateway` και adapter Better Auth αντί για δικό του πρωτόκολλο ταυτοποίησης. Το παλιό δοκιμαστικό module έχει αφαιρεθεί. Αναλυτική ροή: [structure-and-flow.md](structure-and-flow.md).
 
 ## Front end
 
 - `src/app/layout.tsx`: κοινό κέλυφος (header, πλοήγηση).
 - `src/app/globals.css`: μόνο design tokens (light/dark), βασικά styles, `ui-*` κλάσεις των `shared/ui` και γενικά layouts.
 - `src/shared/ui/`: `Button`/`buttonClass`, `Field`, `Card`, `Badge`, `NavLink`. Γενικά components: δέχονται props (π.χ. `tone`), δεν ξέρουν τίποτα για modules.
-- UI μιας ενότητας μένει στο `modules/<x>/presentation/components/`, με τα styles του σε CSS Module δίπλα του (π.χ. `order-list.module.css`).
+- UI μιας ενότητας μένει στο `modules/<x>/presentation/components/`, με τα styles του σε CSS Module δίπλα του (π.χ. `auth-screen.module.css`).
+- Στο `users`, το δημόσιο `AuthScreen` συνθέτει την κοινή `AuthForm`. Οι εμφανίσεις `nucleus`, `smart-save`, `midnight` επιλέγονται κεντρικά στον κώδικα· προεπιλογή `smart-save`. Το `UserAccount` εμφανίζει το προστατευμένο DTO προφίλ.
 
 ## Κανόνες
 
@@ -59,7 +61,7 @@ modules/<name>/
 4α. Το `server.ts` συνδέει use cases με infrastructure και χρησιμοποιεί domain και contracts. Δεν εισάγει actions ή UI· τα actions καλούν αυτό. Το `domain/` και το `application/` **δεν** εισάγουν κανένα `server.ts` (ούτε του ίδιου ούτε άλλου module).
 4β. Το `presentation/` (actions, components, hooks, schemas) δεν εισάγει domain, application ή infrastructure, ούτε του ίδιου module. Τα actions καλούν το `../server`· τύποι έρχονται από το `../contracts`. Τα components και τα hooks δεν εισάγουν κανένα `server.ts` ούτε το `src/server`.
 4γ. Το `infrastructure/` δεν εισάγει το `presentation/` του ίδιου module, συμπεριλαμβανομένων των schemas και των δημόσιων components του. Οι επιτρεπτές εξαρτήσεις από domain, ports και δημόσια σημεία άλλων modules παραμένουν διαθέσιμες.
-5. Τα Server Actions ελέγχουν δεδομένα, ταυτότητα και δικαιώματα πριν εκτελέσουν την ενέργεια. Το ίδιο ισχύει για κάθε **ανάγνωση** προστατευμένων δεδομένων (π.χ. `listOrders()`), όχι μόνο για τις μεταβολές.
+5. Τα Server Actions ελέγχουν δεδομένα, ταυτότητα και δικαιώματα πριν εκτελέσουν την ενέργεια. Το ίδιο ισχύει για κάθε **ανάγνωση** προστατευμένων δεδομένων (π.χ. `getCurrentUser()`), όχι μόνο για τις μεταβολές.
 6. Το `shared` μεγαλώνει μόνο με πραγματική κοινή χρήση και δεν εξαρτάται από `modules/` ή `server/`. Επιχειρησιακοί κανόνες μένουν στο module τους.
 7. Unit/integration tests (Vitest) μένουν δίπλα στον κώδικα (`*.test.ts`). Το `tests/e2e/` (Playwright) είναι για τις συνολικές ροές. Τα use cases ελέγχονται με fake του port, χωρίς infrastructure.
 

@@ -1,86 +1,97 @@
-# Νέο project από το starter
+# Νέο project από τη βάση webapp
 
-## 0. Αφετηρία
+Η βάση περιλαμβάνει ήδη λειτουργική ενότητα `users`, Prisma/MySQL, συνεδρίες στον server, email verification/recovery και κοινό SMTP connector. Το `users` διατηρείται ως πραγματική λειτουργία και σημείο αναφοράς. Οι κανόνες εργασίας βρίσκονται στο [AGENTS.md](../AGENTS.md).
 
-Ξεκίνα από γνωστή έκδοση του starter, όχι από τυχαίο αντίγραφο. Όταν το starter είναι σε git repository, κάθε επιβεβαιωμένη έκδοση παίρνει tag (π.χ. `starter-v1`):
+## 1. Ελεγμένη αφετηρία
 
-```bash
-git tag starter-v1
-```
+Επιβεβαίωσε στο GitHub ότι το commit του `main` που θα χρησιμοποιήσεις έχει περάσει CI και κατέγραψε το SHA του.
 
-Νέο project:
-
-```bash
-git clone --branch starter-v1 <url-του-starter> <νέο-project>
+```sh
+git clone --branch main https://github.com/pagovitsa/webapp.git <νέο-project>
 cd <νέο-project>
+git log -1 --oneline
+git status --short
 npm ci
 npm run check
 ```
 
-Αν το `npm run check` δεν περνά σε καθαρή εγκατάσταση, σταμάτα: το πρόβλημα είναι στο starter, όχι στο νέο project.
+Η αφετηρία είναι έτοιμη όταν το repository είναι καθαρό και το `check` περνά. Αν απαιτείται συγκεκριμένη παλαιότερη έκδοση, επίλεξε υπάρχον, επαληθευμένο commit. Tags εκδόσεων δημιουργούνται μόνο σύμφωνα με τη ρητή εντολή και τη διαδικασία του AGENTS· η εκκίνηση νέου project δεν δημιουργεί tag.
 
-## 1. Ταυτότητα της εφαρμογής
+Ρύθμισε το `origin` στο repository του νέου project πριν ανεβάσεις τις δικές του αλλαγές. Κάθε αλλαγή ακολουθεί branch και pull request, χωρίς απευθείας commit/push στο `main`.
 
-| Αρχείο | Τι αλλάζει |
+## 2. Ταυτότητα και αποφάσεις project
+
+| Απόφαση | Αρχεία |
 |---|---|
-| `package.json` | `name` |
-| `src/app/layout.tsx` | `metadata.title`, `metadata.description`, όνομα στο header (`brand`) |
-| `src/app/page.tsx` | Περιεχόμενο αρχικής σελίδας |
-| `README.md` | Τίτλος και περιγραφή |
+| Όνομα εφαρμογής | `package.json`, metadata/header στο `src/app/layout.tsx`, branding στο `AuthScreen`, `appName` στο `src/server/auth/options.ts`. |
+| Αρχική σελίδα και README | `src/app/page.tsx`, `README.md`. |
+| Γλώσσα, locale, νόμισμα | Κείμενα UI, `html lang`, `src/shared/lib/format.ts`, AGENTS §5. |
+| Χρώματα | Design tokens στο `src/app/globals.css`. |
+| Εμφάνιση χρηστών | `src/modules/users/presentation/auth-appearance.ts`: `smart-save`, `nucleus` ή `midnight`. |
+| Environment και υπηρεσίες | `.env.example`, `src/server/env.ts`, ρυθμίσεις βάσης/auth/SMTP. |
 
-## 2. Ρυθμίσεις του project
+Κατέγραψε τις αλλαγμένες αποφάσεις στο AGENTS §5 και τις επιχειρησιακές υποθέσεις στο README του αντίστοιχου module. Οι αρχιτεκτονικοί κανόνες και τα εργαλεία ορίων διατηρούνται.
 
-| Απόφαση | Πού |
-|---|---|
-| Γλώσσα UI | `<html lang>` στο `layout.tsx`, κείμενα, `AGENTS.md` §5 |
-| Locale και νόμισμα | `DEFAULT_LOCALE`, `DEFAULT_CURRENCY` στο `src/shared/lib/format.ts`, `AGENTS.md` §5 |
-| Χρώματα | Tokens στο `:root` του `src/app/globals.css` |
-| Μεταβλητές περιβάλλοντος | `.env.example`, `src/server/env.ts` |
+## 3. Τοπική βάση και email
 
-Κάθε αλλαγή απόφασης καταγράφεται στο `AGENTS.md` §5, ώστε οι agents να την ακολουθούν.
+Προϋποθέσεις: Node 26, npm 11 και ενεργό Docker Engine. Στα Windows ο υπάρχων helper περιμένει Docker μέσα στο WSL Debian· στο Linux χρησιμοποιεί native Docker.
 
-## 3. Αφαίρεση του demo
-
-Το `orders` είναι δοκιμαστικό. Στο νέο project:
-
-1. Σβήσε `src/modules/orders/` (μαζί φεύγουν και τα unit tests του) και `src/app/orders/`.
-2. Σβήσε το `tests/e2e/orders.spec.ts`. Ελέγχει τη σελίδα `/orders` και το link «Παραγγελίες», που δεν υπάρχουν πια.
-3. Στο `src/app/layout.tsx`, σβήσε το `<NavLink href="/orders">`.
-4. Στο `src/app/page.tsx`, σβήσε τα links και τις κάρτες για τις παραγγελίες.
-5. Στα `docs/architecture.md` και `docs/structure-and-flow.md`, οι αναφορές στο `orders` παραπέμπουν πλέον στην έκδοση αναφοράς του starter (`starter-v1`). Άφησέ τες ή αντικατάστησέ τες με το πρώτο πραγματικό module.
-
-Έλεγχος ότι δεν έμεινε τίποτα:
-
-```bash
-git grep -n -i "orders"
-```
-
-Επιτρέπονται μόνο αναφορές στα `docs/` (βήμα 5).
-
-Το `orders` παραμένει διαθέσιμο στο tag του starter ως παράδειγμα.
-
-> Χωρίς κανένα αρχείο στο `tests/e2e/`, το `npm run test:e2e` αποτυγχάνει («No tests found»), άρα και το CI. Η αφαίρεση του demo και το πρώτο module, με το δικό του e2e test, μπαίνουν στο **ίδιο** pull request.
-
-## 4. Πρώτο πραγματικό module
-
-```bash
-npm run module:new -- <όνομα> --page
-```
-
-Και μετά τα βήματα του `docs/new-module.md`, μαζί με το `tests/e2e/<όνομα>.spec.ts` για την κύρια ροή του. Αν το πρώτο module δεν έχει σελίδα, γράψε ένα e2e test για την αρχική σελίδα (`tests/e2e/home.spec.ts`), ώστε το `test:e2e` να έχει τουλάχιστον ένα test.
-
-## 5. Έλεγχος
-
-```bash
-npm run check
-```
-
-```bash
-npm run test:e2e
-```
-
-```bash
+```sh
+npm run services:up
+npm run auth:migrate
 npm run dev
 ```
 
-Το `test:e2e` πρέπει να τρέχει τα tests του πρώτου module και κανένα του `orders`. Άνοιξε την εφαρμογή και δοκίμασε τη διαδρομή του πρώτου module.
+Ο helper δημιουργεί μόνο τα env αρχεία που λείπουν, με τυχαία τοπικά credentials. Τα `.env.local` και `.env.mysql.local` παραμένουν ignored. Το `.env.example` είναι αναφορά για τις απαιτούμενες μεταβλητές· η αντιγραφή placeholders πάνω στα generated credentials δεν αποτελεί μέρος της κανονικής εκκίνησης.
+
+Οι υπηρεσίες χρησιμοποιούν σταθερά ονόματα (`webapp-mysql`, `webapp-mailpit`, volume `webapp-mysql-data`) και loopback ports (13306 MySQL, 12525 SMTP, 18025 Mailpit UI). Πριν εκκινήσεις δεύτερο ανεξάρτητο project στον ίδιο Docker host, όρισε χωριστά ονόματα, volume και ports στον helper και διατήρησε συνεπείς τις test ρυθμίσεις. Η αλλαγή ονόματος φακέλου ή package δεν απομονώνει τις υπηρεσίες.
+
+Χώρισε τα περιβάλλοντα: η εφαρμογή χρησιμοποιεί `webapp_dev`, το Playwright `webapp_test`, με διαφορετικούς non-root χρήστες. Τα τοπικά credentials πρέπει να παραμένουν μαζί με το αντίστοιχο volume. Μην αφαιρείς env αρχεία ή υπάρχοντα δεδομένα ως τρόπο επαναρύθμισης.
+
+Άνοιξε την εφαρμογή στο `http://localhost:3000` και το δοκιμαστικό γραμματοκιβώτιο στο `http://127.0.0.1:18025`. Τα emails επιβεβαίωσης και ανάκτησης παραμένουν στο Mailpit· δεν παραδίδονται σε εξωτερικούς παραλήπτες.
+
+## 4. Έλεγχος της υπάρχουσας ενότητας χρηστών
+
+```sh
+npx playwright install chromium
+npm run check
+npm run test:e2e
+```
+
+Το Playwright εκκινεί τις υπηρεσίες, εφαρμόζει migrations στην test βάση και ελέγχει production build. Τα όρια, ο generator και η ενότητα χρηστών πρέπει να παραμένουν πράσινα μετά την προσαρμογή του project.
+
+Στον development browser δοκίμασε:
+
+1. Εγγραφή με username/password και προαιρετικό όνομα/επώνυμο.
+2. Σφάλμα μορφής και παραβίαση κανόνα, με προσβάσιμο μήνυμα.
+3. Επιβεβαίωση από το Mailpit, σύνδεση και προστατευμένο προφίλ.
+4. Αποσύνδεση και ανάκτηση κωδικού με email του Mailpit.
+5. Τις τέσσερις φόρμες στην επιλεγμένη εμφάνιση και τις υπόλοιπες [προεπισκοπήσεις](../src/modules/users/README.md#εμφανίσεις-ταυτοποίησης).
+
+Η επαναχρησιμοποίηση του `users` δεν εισάγει αυτόματα δικαιώματα για τις επόμενες ενότητες. Κάθε προστατευμένη ανάγνωση και μεταβολή χρειάζεται δικό της έλεγχο πρόσβασης στον server.
+
+## 5. Πρώτη νέα επιχειρησιακή ενότητα
+
+Δημιούργησε branch από το ενημερωμένο `main` και χρησιμοποίησε τον generator:
+
+```sh
+npm run module:new -- customers --page
+```
+
+Συμπλήρωσε πρώτα το README του νέου module και ακολούθησε το [new-module.md](new-module.md). Η δημιουργία περιλαμβάνει domain, ports, use cases, infrastructure, δημόσια contracts/server API, presentation και τις κατάλληλες δοκιμές.
+
+Όταν χρειάζεσαι δεδομένα χρηστών, χρησιμοποίησε δημόσιο σημείο του `users` μέσω adapter στο infrastructure ή πέρασε την ταυτότητα στο use case. Το application παραμένει ανεξάρτητο από Next.js και από τα εσωτερικά άλλων modules. Μόνιμα δεδομένα χρειάζονται Prisma schema/migrations και σαφείς εγγυήσεις αποθήκευσης.
+
+Το pull request περιγράφει τη συμπεριφορά, τις υποθέσεις και τα πραγματικά αποτελέσματα `check`, e2e και browser. Merge γίνεται μετά από πράσινο CI και σύμφωνα με την εξουσιοδότηση του AGENTS.
+
+## 6. Προετοιμασία παραγωγής
+
+Η τοπική εγκατάσταση Docker δεν είναι έτοιμη διαμόρφωση παραγωγής. Πριν από deployment:
+
+- Όρισε πραγματική MySQL, δικαιώματα ανά περιβάλλον και ελεγμένο backup/restore.
+- Χρησιμοποίησε ξεχωριστά secrets και HTTPS· τα Secure cookies ενεργοποιούνται με HTTPS origin.
+- Ρύθμισε πραγματικό SMTP και κατάλληλο αποστολέα για εξωτερική παράδοση.
+- Ρύθμισε τον reverse proxy να αντικαθιστά τα forwarded IP headers που χρησιμοποιεί το rate limiting.
+- Επαλήθευσε τις ροές σε production τοπολογία και στους browsers που θα υποστηρίζονται.
+
+Το υλοποιημένο logout απαιτεί ανάκληση στη βάση πριν καθαρίσει το cookie και επιστρέφει 503 αν αποτύχει. Οι JSON αποκρίσεις δεν εκθέτουν session tokens ή password hashes. Οι αλλαγές αυτών των εγγυήσεων αξιολογούνται ως αλλαγές ασφάλειας και όχι ως απλή προσαρμογή εμφάνισης.
