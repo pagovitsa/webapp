@@ -159,6 +159,22 @@ code {
   background: var(--surface-muted);
 }
 
+@media (max-width: 620px) {
+  .site-header__inner {
+    height: auto;
+    min-height: 56px;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .site-nav {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
 .site-main {
   padding-top: 40px;
   padding-bottom: 64px;

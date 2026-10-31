@@ -101,7 +101,7 @@ module.exports = {
     },
   ],
   options: {
-    doNotFollow: { path: "node_modules" },
+    doNotFollow: { path: "(^|/)(node_modules|\\.generated)/" },
     // Το node_modules δεν αποκλείεται (μόνο δεν ακολουθείται), ώστε να ελέγχονται imports προς next/react.
     exclude: { path: "^\\.next/" },
     tsPreCompilationDeps: true,

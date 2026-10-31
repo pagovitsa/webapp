@@ -8,38 +8,48 @@
   },
   "packageManager": "npm@11.20.0",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "prisma generate && next dev",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "prisma generate && tsc --noEmit",
     "arch": "depcruise src --config .dependency-cruiser.cjs",
     "test:tooling": "node --test \"tests/**/*.test.mjs\"",
     "test:unit": "vitest run",
     "test": "npm run test:unit && npm run test:tooling",
     "test:e2e": "playwright test",
     "check": "npm run typecheck && npm run lint && npm run arch && npm run test && npm run build",
-    "module:new": "node scripts/new-module.mjs"
+    "module:new": "node scripts/new-module.mjs",
+    "auth:migrate": "node --env-file-if-exists=.env.local node_modules/prisma/build/index.js migrate deploy",
+    "services:up": "node tooling/dev-services.mjs"
   },
   "dependencies": {
+    "@better-auth/prisma-adapter": "^1.7.14",
+    "@prisma/adapter-mariadb": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "better-auth": "^1.7.14",
     "next": "^16.0.0",
+    "nodemailer": "^10.3.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
   },
   "overrides": {
     "minimatch@<4": "$minimatch",
     "minimatch@>=4 <11.0.1": "11.0.3"
   },
   "devDependencies": {
-    "minimatch": "file:tooling/minimatch-compat",
     "@playwright/test": "^1.64.1",
     "@types/node": "^22.0.0",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "dependency-cruiser": "^18.7.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.0",
+    "minimatch": "file:tooling/minimatch-compat",
+    "prisma": "^7.10.1",
     "typescript": "^5.6.0",
     "vitest": "^5.0.5"
   }

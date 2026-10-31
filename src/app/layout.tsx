@@ -21,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="site-nav" aria-label="Κύρια πλοήγηση">
               <NavLink href="/">Αρχική</NavLink>
               <NavLink href="/orders">Παραγγελίες</NavLink>
+              <NavLink href="/users">Λογαριασμός</NavLink>
             </nav>
           </div>
         </header>
