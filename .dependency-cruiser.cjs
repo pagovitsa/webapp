@@ -54,7 +54,6 @@ module.exports = {
       from: { path: "^src/modules/([^/]+)/domain/", pathNot: "\\.test\\.ts$" },
       to: {
         pathNot: ["^src/modules/$1/domain/"],
-        dependencyTypesNot: ["core"],
       },
     },
     {
@@ -71,6 +70,13 @@ module.exports = {
           FRAMEWORK,
         ],
       },
+    },
+    {
+      name: "infrastructure-no-presentation",
+      severity: "error",
+      comment: "Το infrastructure δεν εισάγει το presentation του ίδιου module.",
+      from: { path: "^src/modules/([^/]+)/infrastructure/" },
+      to: { path: "^src/modules/$1/presentation/" },
     },
     {
       name: "server-ts-no-presentation",

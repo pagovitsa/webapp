@@ -26,7 +26,7 @@ export function Field({ label, error, hint, id, className, ...props }: FieldProp
         {...props}
       />
       {message && (
-        <p id={messageId} className={error ? "ui-field__error" : "ui-field__hint"}>
+        <p id={messageId} className={error ? "ui-field__error" : "ui-field__hint"} role={error ? "alert" : undefined}>
           {message}
         </p>
       )}

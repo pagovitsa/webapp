@@ -19,9 +19,22 @@ test("η αρχική σελίδα οδηγεί στις παραγγελίες"
 });
 
 test("σφάλμα μορφής από το schema", async ({ page }) => {
+  const customer = uniqueCustomer("Schema");
   await page.goto("/orders");
-  await submitOrder(page, uniqueCustomer("Schema"), "abc");
-  await expect(page.getByText("Το ποσό πρέπει να είναι αριθμός")).toBeVisible();
+  const alerts = page.getByRole("main").getByRole("alert");
+  await expect(alerts).toHaveCount(0);
+  await submitOrder(page, customer, "abc");
+  await expect(alerts).toHaveText("Το ποσό πρέπει να είναι αριθμός, π.χ. 49,90.");
+  await expect(page.getByLabel("Πελάτης")).toHaveValue(customer);
+  await expect(page.getByLabel("Ποσό (€)")).toHaveValue("abc");
+});
+
+test("το schema ανακοινώνει το κενό όνομα πελάτη", async ({ page }) => {
+  await page.goto("/orders");
+  await submitOrder(page, "", "10");
+  await expect(page.getByRole("main").getByRole("alert")).toHaveText("Συμπλήρωσε το όνομα πελάτη.");
+  await expect(page.getByLabel("Ποσό (€)")).toHaveValue("10");
+  await expect(page.getByText("Έως 100.000 €.", { exact: true })).toBeVisible();
 });
 
 test("σφάλμα κανόνα από το domain, με διατήρηση των τιμών", async ({ page }) => {
