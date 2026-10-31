@@ -43,12 +43,23 @@ npm run check
 
 Το `orders` είναι δοκιμαστικό. Στο νέο project:
 
-1. Σβήσε `src/modules/orders/` και `src/app/orders/`.
-2. Στο `src/app/layout.tsx`, σβήσε το `<NavLink href="/orders">`.
-3. Στο `src/app/page.tsx`, σβήσε τα links και τις κάρτες για τις παραγγελίες.
-4. Στα `docs/architecture.md` και `docs/structure-and-flow.md`, οι αναφορές στο `orders` παραπέμπουν πλέον στην έκδοση αναφοράς του starter (`starter-v1`). Άφησέ τες ή αντικατάστησέ τες με το πρώτο πραγματικό module.
+1. Σβήσε `src/modules/orders/` (μαζί φεύγουν και τα unit tests του) και `src/app/orders/`.
+2. Σβήσε το `tests/e2e/orders.spec.ts`. Ελέγχει τη σελίδα `/orders` και το link «Παραγγελίες», που δεν υπάρχουν πια.
+3. Στο `src/app/layout.tsx`, σβήσε το `<NavLink href="/orders">`.
+4. Στο `src/app/page.tsx`, σβήσε τα links και τις κάρτες για τις παραγγελίες.
+5. Στα `docs/architecture.md` και `docs/structure-and-flow.md`, οι αναφορές στο `orders` παραπέμπουν πλέον στην έκδοση αναφοράς του starter (`starter-v1`). Άφησέ τες ή αντικατάστησέ τες με το πρώτο πραγματικό module.
+
+Έλεγχος ότι δεν έμεινε τίποτα:
+
+```bash
+git grep -n -i "orders"
+```
+
+Επιτρέπονται μόνο αναφορές στα `docs/` (βήμα 5).
 
 Το `orders` παραμένει διαθέσιμο στο tag του starter ως παράδειγμα.
+
+> Χωρίς κανένα αρχείο στο `tests/e2e/`, το `npm run test:e2e` αποτυγχάνει («No tests found»), άρα και το CI. Η αφαίρεση του demo και το πρώτο module, με το δικό του e2e test, μπαίνουν στο **ίδιο** pull request.
 
 ## 4. Πρώτο πραγματικό module
 
@@ -56,13 +67,20 @@ npm run check
 npm run module:new -- <όνομα> --page
 ```
 
-Και μετά τα βήματα του `docs/new-module.md`.
+Και μετά τα βήματα του `docs/new-module.md`, μαζί με το `tests/e2e/<όνομα>.spec.ts` για την κύρια ροή του. Αν το πρώτο module δεν έχει σελίδα, γράψε ένα e2e test για την αρχική σελίδα (`tests/e2e/home.spec.ts`), ώστε το `test:e2e` να έχει τουλάχιστον ένα test.
 
 ## 5. Έλεγχος
 
 ```bash
 npm run check
+```
+
+```bash
+npm run test:e2e
+```
+
+```bash
 npm run dev
 ```
 
-Άνοιξε την εφαρμογή και δοκίμασε τη διαδρομή του πρώτου module.
+Το `test:e2e` πρέπει να τρέχει τα tests του πρώτου module και κανένα του `orders`. Άνοιξε την εφαρμογή και δοκίμασε τη διαδρομή του πρώτου module.
