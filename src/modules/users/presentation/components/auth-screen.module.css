@@ -229,18 +229,30 @@
   font-size: 13px;
 }
 
-.tabs a {
+.tabs a, .tabs button {
   padding: 8px;
   border-radius: 8px;
   text-align: center;
   text-decoration: none;
   color: var(--auth-muted);
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
 }
 
-.tabs a[aria-current="page"] {
+.tabs a[aria-current="page"], .tabs button[aria-pressed="true"] {
   background: var(--auth-background);
   color: var(--auth-foreground);
   box-shadow: var(--shadow);
+}
+
+.screen.fullScreen {
+  width: 100%;
+  min-height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .art {
@@ -565,4 +577,31 @@
   .midnight {
     padding: 8px;
   }
+}
+.registration .surface {
+  padding: 24px clamp(24px, 4vw, 60px) 20px;
+}
+.registration .content { max-width: 420px; }
+.registration .lead { margin-bottom: 6px; }
+.registration .title { font-size: 28px; }
+.registration .note { margin: 8px 0 14px; }
+.registration .tabs { margin-bottom: 14px; padding: 4px; }
+.registration .tabs a { padding: 6px; }
+.registration .footer { margin-top: 16px; }
+.registration .surface :global(.ui-field) { gap: 4px; }
+.registration .surface :global(.ui-input) { height: 44px; }
+.registration .surface :global(.ui-button--primary) { height: 44px; margin-top: 0; }
+@media (max-width: 720px) {
+  .registration .story { min-height: 0; padding: 16px 20px; }
+  .registration .storyCopy, .registration .art { display: none; }
+  .registration .surface { padding: 20px 18px; }
+  .registration .lead { display: none; }
+  .registration .title { font-size: 24px; }
+}
+@media (min-width: 721px) and (max-height: 700px) {
+  .registration .surface { padding-top: 16px; padding-bottom: 16px; }
+  .registration .story { min-height: 0; }
+  .registration .storyCopy { margin-top: 120px; }
+  .registration .lead, .registration .footer { display: none; }
+  .registration.smartSave .vault { width: 45%; left: 28%; top: 15%; }
 }

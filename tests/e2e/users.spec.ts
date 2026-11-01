@@ -44,38 +44,38 @@ async function register(page: Page, user: ReturnType<typeof identity>) {
   await page.getByRole("button", { name: "Δημιουργία λογαριασμού", exact: true }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Η εγγραφή ολοκληρώθηκε");
 }
-async function login(page: Page, username: string, pass = password) {
+async function login(page: Page, username: string, pass = password, successful = true) {
   await page.goto("/users/login");
   await page.getByLabel("Όνομα χρήστη", { exact: true }).fill(username);
   await page.getByLabel("Κωδικός", { exact: true }).fill(pass);
   await page.getByRole("button", { name: "Σύνδεση", exact: true }).click();
+  if (successful) await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText("Έχεις συνδεθεί");
 }
 async function verifiedUser(page: Page, request: APIRequestContext) {
   const user = identity();
   await register(page, user);
   await page.goto(await mailLink(request, user.email, "Επιβεβαίωση"));
-  await expect(page).toHaveURL(/\/users\/login\?verified=1$/);
+  await expect(page).toHaveURL(/\/users\?verified=1$/);
   return user;
 }
 
 test("anonymous users cannot read a profile", async ({ page }) => {
   await page.goto("/users");
-  await expect(page).toHaveURL(/\/users\/login$/);
+  await expect(page).toHaveURL(/\/users$/);
   expect((await page.request.get("/api/users/me")).status()).toBe(401);
 });
 
-test("home leads to the users flows and the old demo route is absent", async ({ page, request }) => {
+test("home opens login and registration remains reachable without the old demo", async ({ page, request }) => {
   await page.goto("/");
+  await expect(page).toHaveURL(/\/users$/);
   const main = page.getByRole("main");
-  await expect(main.getByRole("heading", { level: 1 })).toHaveText("Ο λογαριασμός σου. Ο χώρος σου.");
+  await expect(main.getByRole("heading", { level: 1 })).toHaveText("Σύνδεση");
   await page.setViewportSize({ width: 320, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(page.getByRole("link", { name: "Παραγγελίες", exact: true })).toHaveCount(0);
-  await main.getByRole("link", { name: "Σύνδεση", exact: true }).click();
-  await expect(page).toHaveURL(/\/users\/login$/);
-  await page.goto("/");
-  await page.getByRole("main").getByRole("link", { name: "Δημιουργία λογαριασμού", exact: true }).click();
-  await expect(page).toHaveURL(/\/users\/register$/);
+  await main.getByRole("navigation", { name: "Επιλογή λογαριασμού" }).getByRole("link", { name: "Εγγραφή", exact: true }).click();
+  await expect(page).toHaveURL(/\/users$/);
+  await expect(main.getByRole("heading", { level: 1 })).toHaveText("Δημιουργία λογαριασμού");
   expect((await request.get("/orders")).status()).toBe(404);
 });
 
@@ -92,10 +92,51 @@ test("registration schema and domain failures are accessible", async ({ page }) 
   await expect(page.getByRole("main").getByRole("alert").filter({ hasText: "3–30" })).toBeVisible();
 });
 
+test("all auth forms share the full-screen users route without the top navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/users");
+  const main = page.getByRole("main");
+  await expect(page.locator(".site-header")).toHaveCount(0);
+  const screen = page.getByRole("region", { name: "Φόρμα: Σύνδεση", exact: true });
+  const bounds = await screen.boundingBox();
+  expect(bounds?.x).toBe(0);
+  expect(bounds?.y).toBe(0);
+  expect(bounds?.width).toBe(1440);
+  expect(bounds?.height).toBeGreaterThanOrEqual(900);
+  await page.screenshot({ path: ".data/users-login-full.png", fullPage: true });
+  await main.getByRole("navigation", { name: "Επιλογή λογαριασμού" }).getByRole("link", { name: "Εγγραφή" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/users$/);
+  await expect(main.getByRole("heading", { level: 1 })).toHaveText("Δημιουργία λογαριασμού");
+  await expect(main.getByRole("heading", { level: 1 })).toBeFocused();
+  for (const viewport of [{ width: 1366, height: 768 }, { width: 1280, height: 650 }]) {
+    await page.setViewportSize(viewport);
+    const registration = await page.getByRole("region", { name: "Φόρμα: Δημιουργία λογαριασμού", exact: true }).boundingBox();
+    expect(registration?.height).toBeLessThanOrEqual(viewport.height);
+    const submit = await page.getByRole("button", { name: "Δημιουργία λογαριασμού", exact: true }).boundingBox();
+    expect(submit && submit.y + submit.height).toBeLessThanOrEqual(viewport.height);
+  }
+  await page.screenshot({ path: ".data/registration-compact.png", fullPage: true });
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: ".data/registration-compact-mobile.png", fullPage: true });
+  await page.getByLabel("Κωδικός", { exact: true }).fill(password);
+  await main.getByRole("navigation", { name: "Επιλογή λογαριασμού" }).getByRole("link", { name: "Σύνδεση" }).click();
+  await expect(page.getByLabel("Κωδικός", { exact: true })).toHaveValue("");
+  await main.getByRole("button", { name: "Ξέχασα τον κωδικό μου" }).click();
+  await expect(page).toHaveURL(/\/users$/);
+  await expect(main.getByRole("heading", { level: 1 })).toHaveText("Ανάκτηση κωδικού");
+  await main.getByRole("button", { name: "Σύνδεση", exact: true }).click();
+  await expect(main.getByRole("heading", { level: 1 })).toHaveText("Σύνδεση");
+  await page.setViewportSize({ width: 320, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect((await screen.boundingBox())?.width).toBe(320);
+});
+
 test("verification, persisted profile and logout revoke the session", async ({ page, request, playwright, baseURL }) => {
   const user = identity();
   await register(page, user);
-  await login(page, user.username);
+  await login(page, user.username, password, false);
   await expect(page.getByRole("main").getByRole("alert")).toContainText("Επιβεβαίωσε πρώτα");
   await expect.poll(async () => {
     const response = await request.get(`${settings.mailpitUrl}/api/v1/search`, { params: { query: `to:${user.email}` } });
@@ -105,7 +146,7 @@ test("verification, persisted profile and logout revoke the session", async ({ p
   await page.goto(await mailLink(request, user.email, "Επιβεβαίωση"));
   await login(page, user.username.toUpperCase());
   await expect(page).toHaveURL(/\/users$/);
-  await expect(page.getByRole("main")).toContainText(user.firstName);
+  await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText("Έχεις συνδεθεί");
   const record = await db.user.findUniqueOrThrow({ where: { username: user.username } });
   const account = await db.account.findFirstOrThrow({ where: { userId: record.id } });
   expect(account.password).not.toBe(password);
@@ -113,6 +154,7 @@ test("verification, persisted profile and logout revoke the session", async ({ p
   const profile = await page.request.get("/api/users/me");
   expect(profile.status()).toBe(200);
   const data: unknown = await profile.json();
+  expect(data).toMatchObject({ user: { firstName: user.firstName, lastName: user.lastName } });
   const serialized = JSON.stringify(data);
   expect(serialized).not.toContain('"token"');
   expect(serialized).not.toContain('"password"');
@@ -124,7 +166,8 @@ test("verification, persisted profile and logout revoke the session", async ({ p
   try {
     expect((await replay.get("/api/users/me")).status()).toBe(200);
     await page.getByRole("button", { name: "Αποσύνδεση" }).click();
-    await expect(page).toHaveURL(/\/users\/login$/);
+    await expect(page).toHaveURL(/\/users$/);
+    await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText("Σύνδεση");
     expect((await replay.get("/api/users/me")).status()).toBe(401);
   } finally { await replay.dispose(); }
 });
@@ -145,7 +188,7 @@ test("password reset is single-use and revokes existing sessions", async ({ page
     await page.getByLabel("Νέος κωδικός", { exact: true }).fill(newPassword);
     await page.getByLabel("Επιβεβαίωση κωδικού", { exact: true }).fill(newPassword);
     await page.getByRole("button", { name: "Αλλαγή κωδικού" }).click();
-    await expect(page).toHaveURL(/\/users\/login\?reset=1$/);
+    await expect(page).toHaveURL(/\/users\?reset=1$/);
     expect((await previousContext.request.get("/api/users/me")).status()).toBe(401);
     const reuse = await request.post("/api/auth/reset-password", { headers: { Origin: baseURL ?? "" }, data: { token, newPassword: password } });
     expect(reuse.status()).toBeGreaterThanOrEqual(400);
