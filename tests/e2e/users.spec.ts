@@ -109,6 +109,17 @@ test("all auth forms share the full-screen users route without the top navigatio
   await expect(page).toHaveURL(/\/users$/);
   await expect(main.getByRole("heading", { level: 1 })).toHaveText("Δημιουργία λογαριασμού");
   await expect(main.getByRole("heading", { level: 1 })).toBeFocused();
+  for (const viewport of [{ width: 1366, height: 768 }, { width: 1280, height: 650 }]) {
+    await page.setViewportSize(viewport);
+    const registration = await page.getByRole("region", { name: "Φόρμα: Δημιουργία λογαριασμού", exact: true }).boundingBox();
+    expect(registration?.height).toBeLessThanOrEqual(viewport.height);
+    const submit = await page.getByRole("button", { name: "Δημιουργία λογαριασμού", exact: true }).boundingBox();
+    expect(submit && submit.y + submit.height).toBeLessThanOrEqual(viewport.height);
+  }
+  await page.screenshot({ path: ".data/registration-compact.png", fullPage: true });
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: ".data/registration-compact-mobile.png", fullPage: true });
   await page.getByLabel("Κωδικός", { exact: true }).fill(password);
   await main.getByRole("navigation", { name: "Επιλογή λογαριασμού" }).getByRole("link", { name: "Σύνδεση" }).click();
   await expect(page.getByLabel("Κωδικός", { exact: true })).toHaveValue("");

@@ -17,16 +17,21 @@ export function AuthForm({ mode, token = "", preview = false, onModeChange }: { 
   return (
     <div className="form-stack">
       <form action={action} className="form-stack" noValidate>
-        <fieldset className={styles.fields} disabled={preview}>
+        <fieldset className={`${styles.fields} ${mode === "register" ? styles.registration : ""}`} disabled={preview}>
         {mode === "reset-password" && <input type="hidden" name="token" value={token} />}
         {(mode === "login" || mode === "register") && <Field label="Όνομα χρήστη" name="username" autoComplete="username" maxLength={30} required defaultValue={values?.username} error={errors?.username} />}
         {(mode === "register" || mode === "forgot-password") && <Field label="Email" name="email" type="email" autoComplete="email" required defaultValue={values?.email} error={errors?.email} />}
-        {mode === "register" && <>
+        {mode === "register" && <div className={styles.names}>
           <Field label="Όνομα" name="firstName" autoComplete="given-name" maxLength={100} defaultValue={values?.firstName} error={errors?.firstName} />
           <Field label="Επώνυμο" name="lastName" autoComplete="family-name" maxLength={100} defaultValue={values?.lastName} error={errors?.lastName} />
+        </div>}
+        {mode === "register" ? <div className={styles.passwords}>
+          <Field label="Κωδικός" name="password" type="password" autoComplete="new-password" required error={errors?.password} hint="Από 12 έως 128 χαρακτήρες." />
+          <Field label="Επιβεβαίωση κωδικού" name="confirmPassword" type="password" autoComplete="new-password" required error={errors?.confirmPassword} />
+        </div> : <>
+          {mode !== "forgot-password" && <Field label={mode === "reset-password" ? "Νέος κωδικός" : "Κωδικός"} name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} required error={errors?.password} hint={mode === "login" ? undefined : "Από 12 έως 128 χαρακτήρες."} />}
+          {mode === "reset-password" && <Field label="Επιβεβαίωση κωδικού" name="confirmPassword" type="password" autoComplete="new-password" required error={errors?.confirmPassword} />}
         </>}
-        {mode !== "forgot-password" && <Field label={mode === "reset-password" ? "Νέος κωδικός" : "Κωδικός"} name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} required error={errors?.password} hint={mode === "login" ? undefined : "Από 12 έως 128 χαρακτήρες."} />}
-        {(mode === "register" || mode === "reset-password") && <Field label="Επιβεβαίωση κωδικού" name="confirmPassword" type="password" autoComplete="new-password" required error={errors?.confirmPassword} />}
         {errors?.token && <p role="alert" className="form-message form-message--error">{errors.token}</p>}
         {state.message && <p role={state.status === "success" ? "status" : "alert"} className={`form-message form-message--${state.status === "success" ? "success" : "error"}`}>{state.message}</p>}
         <Button type="submit" className={preview ? styles.previewButton : undefined} disabled={pending || preview}>{pending ? "Περίμενε…" : labels[mode]}</Button>

@@ -33,7 +33,7 @@ export function AuthScreen({ mode, appearance = authAppearance, token, preview =
   const theme = themes[appearance];
   const Heading = preview ? "h2" : "h1";
   return (
-    <section className={`${styles.screen} ${theme.className ?? ""} ${preview ? "" : styles.fullScreen}`} aria-label={`Φόρμα: ${copy.title}`}>
+    <section className={`${styles.screen} ${theme.className ?? ""} ${preview ? "" : styles.fullScreen} ${mode === "register" ? styles.registration : ""}`} aria-label={`Φόρμα: ${copy.title}`}>
       <aside className={styles.story} aria-label="Καλώς ήρθες στο webapp">
         <Link href="/" className={styles.brand}><span className={styles.mark} aria-hidden="true" />webapp</Link>
         <div className={styles.art} aria-hidden="true">
