@@ -167,9 +167,19 @@ test("the sidebar account button logs out and revokes the session", async ({ pag
   } finally { await replay.dispose(); }
 });
 
-test("sidebar groups work by keyboard and the layout fits mobile and dark mode", async ({ page, baseURL }) => {
+test("sidebar fits mobile and keeps the login palette regardless of system theme", async ({ page, baseURL }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/users");
+  const loginForeground = await page.getByRole("heading", { level: 1 }).evaluate(element => getComputedStyle(element).color);
   await account(page, baseURL, { role: "admin", enabled: true });
   await page.goto("/dashboard");
+  const palette = () => page.getByRole("main").evaluate(element => ({
+    text: getComputedStyle(element).color,
+    canvas: getComputedStyle(element.parentElement ?? element).backgroundColor,
+    sidebar: getComputedStyle(document.querySelector("aside") ?? element).backgroundColor,
+  }));
+  const expectedPalette = await palette();
+  expect(expectedPalette.text).toBe(loginForeground);
   const nav = page.getByRole("navigation", { name: "Πλοήγηση dashboard" });
   const summary = nav.locator("summary").filter({ hasText: "Κατηγορία Α" });
   await summary.focus();
@@ -180,6 +190,7 @@ test("sidebar groups work by keyboard and the layout fits mobile and dark mode",
   await expect(page.locator(".site-header")).toHaveCount(0);
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme });
+    expect(await palette()).toEqual(expectedPalette);
     for (const width of [320, 375, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

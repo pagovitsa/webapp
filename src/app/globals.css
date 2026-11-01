@@ -1,7 +1,7 @@
 /* ---------- Tokens ---------- */
 
 :root {
-  color-scheme: light;
+  color-scheme: only light;
   --bg: #f6f7f9;
   --surface: #ffffff;
   --surface-muted: #f1f3f6;
@@ -21,27 +21,6 @@
   --shadow: 0 1px 2px rgb(16 24 40 / 0.05), 0 1px 3px rgb(16 24 40 / 0.06);
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --bg: #0f1115;
-    --surface: #171a20;
-    --surface-muted: #1e222a;
-    --border: #2a2f39;
-    --text: #e8eaee;
-    --text-muted: #9aa2b1;
-    --accent: #6b8cff;
-    --accent-hover: #8aa4ff;
-    --accent-text: #0f1115;
-    --success: #4fcf7f;
-    --success-bg: #173322;
-    --danger: #ff7a73;
-    --danger-bg: #3a1c1b;
-    --focus: #6b8cff66;
-    --shadow: none;
-  }
 }
 
 /* ---------- Base ---------- */
