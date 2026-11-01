@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/modules/users/server";
-import { UserAccount } from "@/modules/users/presentation/components/user-account";
-import { Card } from "@/shared/ui/card";
+import { getDashboard } from "@/modules/dashboards/server";
+import type { AuthEntryQuery } from "@/modules/users/contracts";
+import { UsersEntry } from "@/modules/users/presentation/components/users-entry";
+import { UserSession } from "@/modules/users/presentation/components/user-session";
 
-export const metadata: Metadata = { title: "Ο λογαριασμός μου" };
-export default async function UsersPage() {
+export const metadata: Metadata = { title: "Χρήστες", referrer: "no-referrer", robots: { index: false, follow: false } };
+export default async function UsersPage({ searchParams }: { searchParams: Promise<AuthEntryQuery> }) {
   await connection();
-  const user = await getCurrentUser();
-  if (!user) redirect("/users/login");
-  return <div className="page"><h1>Ο λογαριασμός μου</h1><Card title="Στοιχεία λογαριασμού"><UserAccount user={user} /></Card></div>;
+  const dashboard = await getDashboard();
+  const query = await searchParams;
+  if (query.form === "reset-password" || query.form === "forgot-password") return <UsersEntry query={query} signedIn={dashboard.status !== "anonymous"} />;
+  if (dashboard.status === "ready") redirect("/dashboard");
+  return dashboard.status === "anonymous" ? <UsersEntry query={query} /> : <UserSession />;
 }

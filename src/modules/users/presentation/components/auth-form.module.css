@@ -11,3 +11,13 @@
   opacity: 1;
   cursor: default;
 }
+.switchMode {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--auth-accent);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.switchMode:hover { text-decoration: underline; }

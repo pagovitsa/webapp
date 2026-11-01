@@ -10,7 +10,7 @@ import styles from "./auth-form.module.css";
 const initial: AuthState = { status: "idle" };
 const labels: Record<AuthMode, string> = { register: "Δημιουργία λογαριασμού", login: "Σύνδεση", "forgot-password": "Αποστολή οδηγιών", "reset-password": "Αλλαγή κωδικού" };
 
-export function AuthForm({ mode, token = "", preview = false }: { mode: AuthMode; token?: string; preview?: boolean }) {
+export function AuthForm({ mode, token = "", preview = false, onModeChange }: { mode: AuthMode; token?: string; preview?: boolean; onModeChange?: (mode: AuthMode) => void }) {
   const [state, action, pending] = useActionState(authenticateAction.bind(null, mode), initial);
   const values = state.status === "error" ? state.values : undefined;
   const errors = state.fieldErrors;
@@ -33,9 +33,11 @@ export function AuthForm({ mode, token = "", preview = false }: { mode: AuthMode
         </fieldset>
       </form>
       <nav aria-label="Λογαριασμός">
-        {mode !== "login" && <p><Link href="/users/login">Σύνδεση</Link></p>}
-        {mode !== "register" && <p><Link href="/users/register">Εγγραφή</Link></p>}
-        {mode === "login" && <p><Link href="/users/forgot-password">Ξέχασα τον κωδικό μου</Link></p>}
+        {([["login", "Σύνδεση"], ["register", "Εγγραφή"], ["forgot-password", "Ξέχασα τον κωδικό μου"]] as const)
+          .filter(([target]) => target !== mode && (target !== "forgot-password" || mode === "login"))
+          .map(([target, label]) => <p key={target}>{onModeChange
+            ? <button type="button" className={styles.switchMode} onClick={() => onModeChange(target)}>{label}</button>
+            : <Link href={target === "login" ? "/users" : `/users?form=${target}`}>{label}</Link>}</p>)}
       </nav>
     </div>
   );

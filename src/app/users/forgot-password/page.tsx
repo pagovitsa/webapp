@@ -1,7 +1,5 @@
-import type { Metadata } from "next";
-import { AuthScreen } from "@/modules/users/presentation/components/auth-screen";
-
-export const metadata: Metadata = { title: "Ανάκτηση κωδικού" };
-export default function ForgotPasswordPage() {
-  return <AuthScreen mode="forgot-password" />;
+import { redirectToUsers } from "../auth-redirect";
+import type { AuthEntryQuery } from "@/modules/users/contracts";
+export default async function ForgotPasswordAliasPage({ searchParams }: { searchParams: Promise<AuthEntryQuery> }) {
+  redirectToUsers("forgot-password", await searchParams);
 }

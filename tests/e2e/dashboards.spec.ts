@@ -44,8 +44,8 @@ async function account(page: Page, baseURL: string | undefined, grant?: { role: 
 
 test("anonymous users cannot open the dashboard or its API", async ({ page }) => {
   expect((await page.request.get("/api/dashboards")).status()).toBe(401);
-  await page.goto("/dashboards");
-  await expect(page).toHaveURL(/\/users\/login$/);
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/users$/);
 });
 
 test("signup cannot grant access and account activation defaults to false", async ({ page, baseURL }) => {
@@ -54,17 +54,17 @@ test("signup cannot grant access and account activation defaults to false", asyn
   const grant = await db.dashboardAccess.create({ data: { userId: user.id } });
   expect(grant.role).toBe("user");
   expect(grant.enabled).toBe(false);
-  await page.goto("/dashboards");
+  await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/users$/);
   await expect(page.getByRole("navigation", { name: "Πλοήγηση dashboard" })).toHaveCount(0);
   await db.dashboardAccess.update({ where: { userId: user.id }, data: { enabled: true } });
-  await page.goto("/dashboards");
+  await page.goto("/dashboard");
   await expect(page.getByRole("navigation", { name: "Πλοήγηση dashboard" })).toContainText("Κατηγορία Α");
 });
 
 test("user sees only permitted children and direct admin paths remain unavailable", async ({ page, baseURL }) => {
   await account(page, baseURL, { role: "user", enabled: true });
-  await page.goto("/dashboards");
+  await page.goto("/dashboard");
   const nav = page.getByRole("navigation", { name: "Πλοήγηση dashboard" });
   await expect(nav).not.toContainText("Κατηγορία Β");
   await nav.getByRole("link", { name: "Υποκατηγορία Α1" }).click();
@@ -72,7 +72,7 @@ test("user sees only permitted children and direct admin paths remain unavailabl
   await expect(nav.getByRole("link", { name: "Υποκατηγορία Α1" })).toHaveAttribute("aria-current", "page");
   const denied = await page.request.get("/api/dashboards?section=category-b/item-b1");
   expect(denied.status()).toBe(404);
-  expect((await page.goto("/dashboards/category-b/item-b1"))?.status()).toBe(404);
+  expect((await page.goto("/dashboard/category-b/item-b1"))?.status()).toBe(404);
   expect((await page.request.get("/api/dashboards?section=unknown")).status()).toBe(404);
   const allowed = await page.request.get("/api/dashboards?userId=someone-else&role=admin");
   expect(allowed.status()).toBe(200);
@@ -84,7 +84,7 @@ test("user sees only permitted children and direct admin paths remain unavailabl
 
 test("admin access is rechecked after downgrade, disable and grant deletion", async ({ page, baseURL }) => {
   const user = await account(page, baseURL, { role: "admin", enabled: true });
-  await page.goto("/dashboards/category-b/item-b1");
+  await page.goto("/dashboard/category-b/item-b1");
   await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText("Υποκατηγορία Β1");
   await db.dashboardAccess.update({ where: { userId: user.id }, data: { role: "user" } });
   expect((await page.request.get("/api/dashboards?section=category-b/item-b1")).status()).toBe(404);
@@ -100,14 +100,14 @@ test("database category permissions take effect without a new login", async ({ p
   await account(page, baseURL, { role: "admin", enabled: true });
   const original = await db.dashboardRolePermission.findMany({ where: { role: "admin" } });
   try {
-    await page.goto("/dashboards/category-b/item-b1");
+    await page.goto("/dashboard/category-b/item-b1");
     await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText("Υποκατηγορία Β1");
     await db.dashboardRolePermission.delete({ where: { role_permission: { role: "admin", permission: "administration.read" } } });
     const response = await page.request.get("/api/dashboards");
     expect(response.status()).toBe(200);
     expect(await response.text()).not.toContain("category-b");
     expect((await page.request.get("/api/dashboards?section=category-b/item-b1")).status()).toBe(404);
-    await page.goto("/dashboards");
+    await page.goto("/dashboard");
     await expect(page.getByRole("navigation", { name: "Πλοήγηση dashboard" })).not.toContainText("Κατηγορία Β");
     await db.dashboardRolePermission.deleteMany({ where: { role: "admin" } });
     expect((await page.request.get("/api/dashboards")).status()).toBe(403);
@@ -120,11 +120,17 @@ test("database category permissions take effect without a new login", async ({ p
 test("entry, login and direct dashboard URLs follow the same persistent session", async ({ page, baseURL }) => {
   const user = await account(page, baseURL, { role: "user", enabled: true });
   await page.goto("/");
-  await expect(page).toHaveURL(/\/dashboards$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto("/login");
-  await expect(page).toHaveURL(/\/dashboards$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/users?form=reset-password&error=expired");
+  await page.getByRole("button", { name: "Ζήτησε νέο σύνδεσμο ανάκτησης" }).click();
+  await expect(page).toHaveURL(/\/users$/);
+  await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText("Ανάκτηση κωδικού");
+  await page.getByRole("button", { name: "Σύνδεση", exact: true }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
   await page.goto("/dashboard/category-a/item-a1");
-  await expect(page).toHaveURL(/\/dashboards\/category-a\/item-a1$/);
+  await expect(page).toHaveURL(/\/dashboard\/category-a\/item-a1$/);
   await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText("Υποκατηγορία Α1");
   const before = (await page.context().cookies()).find(cookie => cookie.name.endsWith(".session_token"));
   expect(before).toBeDefined();
@@ -132,11 +138,11 @@ test("entry, login and direct dashboard URLs follow the same persistent session"
   expect((await page.context().cookies()).find(cookie => cookie.name.endsWith(".session_token"))?.value).toBe(before?.value);
   await page.request.post("/api/auth/sign-out", { headers: { Origin: baseURL ?? "" }, data: {} });
   await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/users\/login$/);
+  await expect(page).toHaveURL(/\/users$/);
   await page.getByLabel("Όνομα χρήστη", { exact: true }).fill(user.username ?? "");
   await page.getByLabel("Κωδικός", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Σύνδεση", exact: true }).click();
-  await expect(page).toHaveURL(/\/dashboards$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await db.dashboardAccess.update({ where: { userId: user.id }, data: { enabled: false } });
   for (const route of ["/", "/login", "/dashboard"]) {
     await page.goto(route);
@@ -144,9 +150,26 @@ test("entry, login and direct dashboard URLs follow the same persistent session"
   }
 });
 
+test("the sidebar account button logs out and revokes the session", async ({ page, baseURL, playwright }) => {
+  const user = await account(page, baseURL, { role: "admin", enabled: true });
+  await page.goto("/dashboards");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  const cookie = (await page.context().cookies()).find(value => value.name.endsWith(".session_token"));
+  if (!cookie) throw new Error("Expected an authenticated session.");
+  const replay = await playwright.request.newContext({ baseURL, extraHTTPHeaders: { Cookie: `${cookie.name}=${cookie.value}` } });
+  try {
+    expect((await replay.get("/api/dashboards")).status()).toBe(200);
+    await page.getByRole("complementary").getByRole("button", { name: `Αποσύνδεση: ${user.username}`, exact: true }).click();
+    await expect(page).toHaveURL(/\/users$/);
+    await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText("Σύνδεση");
+    expect((await replay.get("/api/dashboards")).status()).toBe(401);
+    expect((await replay.get("/api/users/me")).status()).toBe(401);
+  } finally { await replay.dispose(); }
+});
+
 test("sidebar groups work by keyboard and the layout fits mobile and dark mode", async ({ page, baseURL }) => {
   await account(page, baseURL, { role: "admin", enabled: true });
-  await page.goto("/dashboards");
+  await page.goto("/dashboard");
   const nav = page.getByRole("navigation", { name: "Πλοήγηση dashboard" });
   const summary = nav.locator("summary").filter({ hasText: "Κατηγορία Α" });
   await summary.focus();
@@ -185,7 +208,7 @@ test("sidebar groups work by keyboard and the layout fits mobile and dark mode",
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText("Υποκατηγορία Α2");
   await page.getByRole("button", { name: "Μενού", exact: true }).click();
-  const footer = await page.getByRole("dialog").getByRole("link").last().boundingBox();
+  const footer = await page.getByRole("dialog").getByRole("button", { name: /Αποσύνδεση/ }).boundingBox();
   expect(footer && footer.y + footer.height).toBeCloseTo(792, 0);
   await page.setViewportSize({ width: 1440, height: 900 });
   await expect(page.locator("dialog")).not.toHaveAttribute("open");

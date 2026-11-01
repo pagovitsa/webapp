@@ -13,12 +13,12 @@ export default async function PreviewPage({ params }: { params: Promise<{ appear
   const requested = (await params).appearance;
   const appearance = appearances.find(value => value === requested);
   if (!appearance) notFound();
-  return <div className="page">
+  return <main className="container site-main page">
     <header className="page-header">
       <h1>Προεπισκόπηση: {appearance}</h1>
       <p>Οι υποβολές είναι απενεργοποιημένες στην προεπισκόπηση.</p>
       <nav aria-label="Προεπισκοπήσεις εμφάνισης">{appearances.map(value => <p key={value}><Link href={`/users/previews/${value}`} aria-current={value === appearance ? "page" : undefined}>{value}</Link></p>)}</nav>
     </header>
     {modes.map(mode => <AuthScreen key={mode} mode={mode} appearance={appearance} token="preview-only" preview />)}
-  </div>;
+  </main>;
 }

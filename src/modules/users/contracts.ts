@@ -11,6 +11,8 @@ export type UserProfile = {
   readonly createdAt: string;
 };
 export type AuthMode = "register" | "login" | "forgot-password" | "reset-password";
+export type AuthEntryQuery = { readonly [key: string]: string | string[] | undefined };
+export type AuthEntry = { readonly mode: AuthMode; readonly token: string; readonly verified: boolean; readonly reset: boolean; readonly invalidLink: boolean };
 export type AuthAppearance = "nucleus" | "smart-save" | "midnight";
 export type AuthField = "username" | "email" | "password" | "confirmPassword" | "firstName" | "lastName" | "token";
 export type AuthValues = Partial<Record<"username" | "email" | "firstName" | "lastName", string>>;

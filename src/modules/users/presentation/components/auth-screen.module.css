@@ -229,18 +229,30 @@
   font-size: 13px;
 }
 
-.tabs a {
+.tabs a, .tabs button {
   padding: 8px;
   border-radius: 8px;
   text-align: center;
   text-decoration: none;
   color: var(--auth-muted);
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
 }
 
-.tabs a[aria-current="page"] {
+.tabs a[aria-current="page"], .tabs button[aria-pressed="true"] {
   background: var(--auth-background);
   color: var(--auth-foreground);
   box-shadow: var(--shadow);
+}
+
+.screen.fullScreen {
+  width: 100%;
+  min-height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .art {

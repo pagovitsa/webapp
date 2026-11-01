@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { DashboardIcon, DashboardView } from "../../contracts";
 import styles from "./dashboard-shell.module.css";
 import { MobileNavigation } from "./internal/mobile-navigation";
+import { SignOutButton } from "@/modules/users/presentation/components/sign-out-button";
 
 const iconPaths: Record<DashboardIcon, string> = {
   folder: "M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3Z",
@@ -13,9 +14,9 @@ function Icon({ name }: { name: DashboardIcon }) {
 }
 export function DashboardShell({ dashboard }: { dashboard: DashboardView }) {
   const sidebar = <>
-        <Link className={styles.brand} href="/dashboards" prefetch={false}><span aria-hidden="true">w</span>webapp</Link>
+        <Link className={styles.brand} href="/dashboard" prefetch={false}><span aria-hidden="true">w</span>webapp</Link>
         <nav aria-label="Πλοήγηση dashboard" className={styles.navigation}>
-          <Link className={styles.overview} href="/dashboards" prefetch={false} aria-current={dashboard.selected.id === "overview" ? "page" : undefined}>
+          <Link className={styles.overview} href="/dashboard" prefetch={false} aria-current={dashboard.selected.id === "overview" ? "page" : undefined}>
             <Icon name="grid" />Επισκόπηση
           </Link>
           <ul className={styles.categories}>
@@ -25,7 +26,7 @@ export function DashboardShell({ dashboard }: { dashboard: DashboardView }) {
                   <summary><Icon name={category.icon} /><span>{category.title}</span><span className={styles.chevron} aria-hidden="true">⌄</span></summary>
                   <ul className={styles.children}>
                     {category.children.map(item => (
-                      <li key={item.id}><Link href={`/dashboards/${item.path}`} prefetch={false} aria-current={dashboard.selected.id === item.id ? "page" : undefined}>{item.title}</Link></li>
+                      <li key={item.id}><Link href={`/dashboard/${item.path}`} prefetch={false} aria-current={dashboard.selected.id === item.id ? "page" : undefined}>{item.title}</Link></li>
                     ))}
                   </ul>
                 </details>
@@ -33,11 +34,11 @@ export function DashboardShell({ dashboard }: { dashboard: DashboardView }) {
             ))}
           </ul>
         </nav>
-        <Link href="/users" className={styles.account}>
+        <SignOutButton formClassName={styles.accountForm} buttonClassName={styles.account} label={`Αποσύνδεση: ${dashboard.username}`}>
           <span className={styles.avatar} aria-hidden="true">{dashboard.username.slice(0, 1).toUpperCase()}</span>
           <span className={styles.identity}><strong>{dashboard.username}</strong><span>{dashboard.role === "admin" ? "Διαχειριστής" : "Χρήστης"}</span></span>
-          <span aria-hidden="true">↗</span>
-        </Link>
+          <span aria-hidden="true">↪</span>
+        </SignOutButton>
     </>;
   return (
     <div className={styles.shell}>

@@ -1,7 +1,5 @@
-import type { Metadata } from "next";
-import { AuthScreen } from "@/modules/users/presentation/components/auth-screen";
-
-export const metadata: Metadata = { title: "Εγγραφή" };
-export default function RegisterPage() {
-  return <AuthScreen mode="register" />;
+import { redirectToUsers } from "../auth-redirect";
+import type { AuthEntryQuery } from "@/modules/users/contracts";
+export default async function RegisterAliasPage({ searchParams }: { searchParams: Promise<AuthEntryQuery> }) {
+  redirectToUsers("register", await searchParams);
 }

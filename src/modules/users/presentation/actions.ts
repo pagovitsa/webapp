@@ -31,12 +31,12 @@ export async function authenticateAction(mode: AuthMode, _previous: AuthState, f
     throw error;
   }
   revalidatePath("/users");
-  redirect(mode === "reset-password" ? "/users/login?reset=1" : "/");
+  redirect(mode === "reset-password" ? "/users?reset=1" : "/");
 }
 
 export async function signOutAction(): Promise<void> {
   // The current cookie identifies the session being revoked; repeat logout is safe.
   await signOut();
   revalidatePath("/users");
-  redirect("/users/login");
+  redirect("/users");
 }

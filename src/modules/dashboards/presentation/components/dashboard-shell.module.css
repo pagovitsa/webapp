@@ -88,14 +88,18 @@
 }
 .overview:hover, .children a:hover, .group summary:hover { background: var(--surface-muted); color: var(--text); }
 .overview[aria-current], .children a[aria-current] { color: var(--text); background: var(--surface); box-shadow: var(--shadow); font-weight: 600; }
-.account {
+.accountForm { margin-top: auto; }
+.accountForm .account {
   display: flex;
   gap: 10px;
   align-items: center;
   padding: 12px 6px 0;
-  margin-top: auto;
   text-decoration: none;
   min-width: 0;
+  width: 100%;
+  height: auto;
+  white-space: normal;
+  text-align: left;
 }
 .avatar { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: color-mix(in srgb, var(--accent) 15%, var(--surface)); color: var(--text); }
 .identity { display: grid; flex: 1; min-width: 0; font-size: 12px; }

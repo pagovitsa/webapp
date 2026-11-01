@@ -32,14 +32,14 @@
 | Σημείο | Δημόσιο |
 |---|---|
 | server.ts | registerUser, signIn, signOut, getCurrentUser, requestPasswordReset, resetPassword, handleAuthRequest, UserError |
-| contracts.ts | UserProfile, RegisterUserInput, SignInInput, PasswordResetInput, AuthMode, AuthField, AuthValues, AuthState, AuthAppearance |
-| presentation/components/ | AuthForm, AuthScreen, UserAccount |
+| contracts.ts | UserProfile, RegisterUserInput, SignInInput, PasswordResetInput, AuthMode, AuthEntryQuery, AuthEntry, AuthField, AuthValues, AuthState, AuthAppearance |
+| presentation/components/ | AuthForm, AuthScreen, UserAccount, UsersEntry({ query, signedIn? }), UserSession(), SignOutButton({ children?, formClassName?, buttonClassName?, label? }) |
 
 ## Εξαρτήσεις
 
 ### Εμφανίσεις ταυτοποίησης
 
-Οι `nucleus`, `smart-save` και `midnight` είναι τρεις ονομαστικές εμφανίσεις της ίδιας φόρμας για σύνδεση, εγγραφή, αίτηση ανάκτησης και ορισμό νέου κωδικού. Η ενεργή εμφάνιση επιλέγεται μόνο στον κώδικα, από το `presentation/auth-appearance.ts`. Η προεπιλογή είναι `smart-save`, κατόπιν επιλογής του χρήστη. Κάθε σελίδα συνθέτει το δημόσιο `AuthScreen`, που δέχεται επίσης ρητά `appearance` όταν χρειάζεται προεπισκόπηση. Δεν προστίθεται επιλογέας εμφάνισης στις πραγματικές φόρμες.
+Οι `nucleus`, `smart-save` και `midnight` είναι τρεις ονομαστικές εμφανίσεις της ίδιας φόρμας για σύνδεση, εγγραφή, αίτηση ανάκτησης και ορισμό νέου κωδικού. Η ενεργή εμφάνιση επιλέγεται μόνο στον κώδικα, από το `presentation/auth-appearance.ts`. Η προεπιλογή είναι `smart-save`, κατόπιν επιλογής του χρήστη. Το δημόσιο `UsersEntry` ελέγχει τα query στοιχεία και συνθέτει την εσωτερική ροή με το `AuthScreen`. Οι κανονικές φόρμες γεμίζουν την οθόνη χωρίς κεντρική μπάρα. Η προεπισκόπηση δέχεται ρητά `appearance`, χωρίς επιλογέα εμφάνισης στις πραγματικές φόρμες.
 
 Τα styles και τα διακοσμητικά γραφικά είναι τοπικά CSS Modules, με χρώματα από τα υπάρχοντα design tokens. Δεν φορτώνονται assets από τρίτους κατά την επίσκεψη. Διατηρούνται τα ελληνικά κείμενα, τα labels/μηνύματα, τα Server Actions και όλοι οι κανόνες ταυτοποίησης. Τα σχέδια προσαρμόζονται στις υπάρχουσες λειτουργίες· δεν προστίθενται μη λειτουργικά κουμπιά social login ή αλλαγή πολιτικής συνεδριών.
 
@@ -103,7 +103,7 @@ npm run test:e2e
 |---|---|
 | Νέα εγγραφή | Email επιβεβαίωσης, χωρίς αυτόματη σύνδεση. |
 | Σύνδεση με σωστό κωδικό πριν από επιβεβαίωση | Νέο email επιβεβαίωσης, χωρίς συνεδρία. |
-| Σωστά credentials, επιβεβαιωμένο email | Νέα συνεδρία και πρόσβαση στο προφίλ. |
+| Σωστά credentials, επιβεβαιωμένο email | Νέα συνεδρία και μετάβαση στο επιτρεπόμενο dashboard ή προσωρινή οθόνη ενεργής σύνδεσης. |
 | Χωρίς συνεδρία | Ανακατεύθυνση στη σύνδεση. |
 | Logout και επαναχρησιμοποίηση παλιού cookie | Καμία πρόσβαση. |
 | Reset με άγνωστο email | Ίδιο ουδέτερο μήνυμα. |
@@ -115,7 +115,9 @@ npm run test:e2e
 
 ## Ανοιχτά θέματα
 
-- Η επιτυχής σύνδεση της φόρμας οδηγεί στο /, όπου η εφαρμογή επιλέγει dashboard βάσει ενεργοποίησης/δικαιωμάτων ή προσωρινά το προφίλ. Το users δεν εισάγει το dashboards ούτε γνωρίζει ρόλους του. Η σελίδα σύνδεσης παρακάμπτεται όταν υπάρχει ήδη ενεργή συνεδρία. Το /login είναι alias του /users/login.
+- Η μοναδική διαδρομή UI είναι /users. Σύνδεση, εγγραφή και ανάκτηση αλλάζουν επιτόπου χωρίς νέο pathname. Η αλλαγή φόρμας καθαρίζει τον κωδικό και τα παλιά μηνύματα. Οι παλιές /users/login, /users/register, /users/forgot-password, /users/reset-password και /login ανακατευθύνουν εκεί, με form query μόνο για συμβατά deep links. Τα email έχουν πλέον προορισμό /users, με status ή reset token όπου απαιτείται.
+- Η επιτυχής σύνδεση οδηγεί στο /, όπου η εφαρμογή επιλέγει /dashboard βάσει ενεργοποίησης/δικαιωμάτων ή προσωρινά την ελάχιστη οθόνη UserSession στο /users. Δεν εμφανίζεται η παλιά κάρτα προφίλ. Το users δεν εισάγει το dashboards ούτε γνωρίζει ρόλους του. Οι δημόσιες ροές ανάκτησης/αλλαγής κωδικού παραμένουν προσβάσιμες και με ενεργή συνεδρία· επιστροφή σε σύνδεση τότε περνά από τον server.
+- Το κοινό SignOutButton χρησιμοποιεί το υπάρχον signOutAction και την αυστηρή ανάκληση συνεδρίας. Το dashboard το χρησιμοποιεί ως δημόσιο component. Μετά από logout εμφανίζεται η σύνδεση στο /users. Η εσωτερική AuthFlow χρειάζεται JavaScript για αλλαγή φόρμας χωρίς αλλαγή URL.
 
 - Μόνιμη αποθήκευση: MySQL μέσω Prisma. Τα Docker services είναι για ανάπτυξη/δοκιμές. Η παραγωγή χρειάζεται δική της βάση, backup, HTTPS και ξεχωριστά μυστικά· ο τοπικός helper δεν εκκινείται από τον production server.
 - Για πραγματική παράδοση email απαιτούνται SMTP και επιβεβαιωμένος αποστολέας. Οι δοκιμές χρησιμοποιούν αποκλειστικά τοπικό SMTP capture, χωρίς αποστολή σε εξωτερικούς παραλήπτες.

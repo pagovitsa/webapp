@@ -43,15 +43,15 @@ function normalizeBody(path: string, input: unknown): Record<string, unknown> {
   if (path === "sign-up/email") {
     const parsed = z.object({ username: z.string(), email, password, firstName: z.string().optional().default(""), lastName: z.string().optional().default("") }).parse(input);
     const data = registrationData(parsed);
-    return { ...data, name: [data.firstName, data.lastName].filter(Boolean).join(" ") || data.username, callbackURL: `${authOrigin()}/users/login?verified=1` };
+    return { ...data, name: [data.firstName, data.lastName].filter(Boolean).join(" ") || data.username, callbackURL: `${authOrigin()}/users?verified=1` };
   }
   if (path === "sign-in/username") {
     const data = z.object({ username: z.string().trim().min(1).max(30), password }).parse(input);
-    return { ...data, username: data.username.toLowerCase(), callbackURL: `${authOrigin()}/users/login?verified=1` };
+    return { ...data, username: data.username.toLowerCase(), callbackURL: `${authOrigin()}/users?verified=1` };
   }
   if (path === "request-password-reset" || path === "send-verification-email") {
     const data = z.object({ email }).parse(input);
-    return path === "request-password-reset" ? { ...data, redirectTo: `${authOrigin()}/users/reset-password` } : { ...data, callbackURL: `${authOrigin()}/users/login?verified=1` };
+    return path === "request-password-reset" ? { ...data, redirectTo: `${authOrigin()}/users?form=reset-password` } : { ...data, callbackURL: `${authOrigin()}/users?verified=1` };
   }
   if (path === "reset-password") {
     const data = z.object({ token: z.string().min(1).max(512), newPassword: password }).parse(input);
