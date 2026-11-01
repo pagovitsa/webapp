@@ -31,7 +31,7 @@ export async function authenticateAction(mode: AuthMode, _previous: AuthState, f
     throw error;
   }
   revalidatePath("/users");
-  redirect(mode === "reset-password" ? "/users/login?reset=1" : "/users");
+  redirect(mode === "reset-password" ? "/users/login?reset=1" : "/");
 }
 
 export async function signOutAction(): Promise<void> {

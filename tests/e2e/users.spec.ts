@@ -64,17 +64,15 @@ test("anonymous users cannot read a profile", async ({ page }) => {
   expect((await page.request.get("/api/users/me")).status()).toBe(401);
 });
 
-test("home leads to the users flows and the old demo route is absent", async ({ page, request }) => {
+test("home opens login and registration remains reachable without the old demo", async ({ page, request }) => {
   await page.goto("/");
+  await expect(page).toHaveURL(/\/users\/login$/);
   const main = page.getByRole("main");
-  await expect(main.getByRole("heading", { level: 1 })).toHaveText("Ο λογαριασμός σου. Ο χώρος σου.");
+  await expect(main.getByRole("heading", { level: 1 })).toHaveText("Σύνδεση");
   await page.setViewportSize({ width: 320, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(page.getByRole("link", { name: "Παραγγελίες", exact: true })).toHaveCount(0);
-  await main.getByRole("link", { name: "Σύνδεση", exact: true }).click();
-  await expect(page).toHaveURL(/\/users\/login$/);
-  await page.goto("/");
-  await page.getByRole("main").getByRole("link", { name: "Δημιουργία λογαριασμού", exact: true }).click();
+  await main.getByRole("navigation", { name: "Επιλογή λογαριασμού" }).getByRole("link", { name: "Εγγραφή", exact: true }).click();
   await expect(page).toHaveURL(/\/users\/register$/);
   expect((await request.get("/orders")).status()).toBe(404);
 });
