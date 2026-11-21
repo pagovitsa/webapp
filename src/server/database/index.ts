@@ -3,6 +3,7 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../../../.generated/prisma/client";
 import { env } from "../env";
 
+// Επαναχρησιμοποίησε τις συνδέσεις όταν ο server δέχεται αιτήματα ή επαναφορτώνεται στην ανάπτυξη.
 const shared = globalThis as typeof globalThis & { webappAuthDatabase?: PrismaClient };
 
 export function openAuthDatabase(): PrismaClient {

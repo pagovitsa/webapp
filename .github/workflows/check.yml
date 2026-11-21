@@ -5,12 +5,19 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 env:
   NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
-  check:
+  verify:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [core, users, dashboards]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,14 +25,41 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - uses: actions/checkout@v4
+        if: matrix.configuration != 'core'
+        with:
+          ref: 354740717e5a7f9eb16e0b392b2b330728b670ff
+          path: module-catalog
+          persist-credentials: false
+      - name: Install selected modules
+        if: matrix.configuration != 'core'
+        env:
+          CONFIGURATION: ${{ matrix.configuration }}
+        run: |
+          mv module-catalog "$RUNNER_TEMP/webapp-modules"
+          export WEBAPP_MODULES_DIR="$RUNNER_TEMP/webapp-modules"
+          npm run module:add -- users
+          if [ "$CONFIGURATION" = dashboards ]; then
+            npm run module:add -- dashboards
+          fi
       - run: npm run check
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.configuration }}
           path: |
             playwright-report/
             test-results/
           retention-days: 7
+
+  check:
+    runs-on: ubuntu-latest
+    needs: verify
+    if: always()
+    steps:
+      - name: Require every configuration to pass
+        env:
+          VERIFY_RESULT: ${{ needs.verify.result }}
+        run: test "$VERIFY_RESULT" = success
