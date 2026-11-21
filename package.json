@@ -15,13 +15,16 @@
     "typecheck": "prisma generate && tsc --noEmit",
     "arch": "depcruise src --config .dependency-cruiser.cjs",
     "test:tooling": "node --test \"tests/**/*.test.mjs\"",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run --passWithNoTests",
     "test": "npm run test:unit && npm run test:tooling",
     "test:e2e": "playwright test",
     "check": "npm run typecheck && npm run lint && npm run arch && npm run test && npm run build",
     "module:new": "node scripts/new-module.mjs",
     "auth:migrate": "node --env-file-if-exists=.env.local node_modules/prisma/build/index.js migrate deploy",
-    "services:up": "node tooling/dev-services.mjs"
+    "services:up": "node tooling/dev-services.mjs",
+    "module:list": "node scripts/install-module.mjs list",
+    "module:add": "node scripts/install-module.mjs add",
+    "db:migrate": "node --env-file-if-exists=.env.local node_modules/prisma/build/index.js migrate deploy"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.7.14",

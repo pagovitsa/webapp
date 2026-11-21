@@ -1,11 +1,4 @@
-import type { Metadata } from "next";
-import { connection } from "next/server";
-import { redirect } from "next/navigation";
-import { getDashboard } from "@/modules/dashboards/server";
-
-export const metadata: Metadata = { title: "Αρχική" };
-export default async function HomePage() {
-  await connection();
-  const result = await getDashboard();
-  redirect(result.status === "ready" ? "/dashboard" : "/users");
+// Κάθε έργο ορίζει τη δική του αρχική σελίδα. Τα προαιρετικά modules προσθέτουν τις δικές τους διαδρομές.
+export default function HomePage() {
+  return <main><h1>Webapp</h1></main>;
 }

@@ -18,3 +18,5 @@ next-env.d.ts
 npm-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+.module-install.lock/

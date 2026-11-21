@@ -17,7 +17,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   // Production build, όχι dev server: ελέγχουμε ό,τι θα τρέξει πραγματικά.
   webServer: {
-    command: `npm run services:up && npm run auth:migrate && npm run build && npm run start -- -p ${port}`,
+    command: `npm run services:up && npm run db:migrate && npm run build && npm run start -- -p ${port}`,
     env: {
       DATABASE_URL: services.testDatabaseUrl,
       AUTH_SECRET: services.authSecret,
