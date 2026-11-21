@@ -1,0 +1,17 @@
+enum DashboardRole {
+  user
+  admin
+}
+
+model DashboardAccess {
+  userId String @id @db.VarChar(191)
+  role DashboardRole @default(user)
+  enabled Boolean @default(false)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DashboardRolePermission {
+  role DashboardRole
+  permission String @db.VarChar(100)
+  @@id([role, permission])
+}

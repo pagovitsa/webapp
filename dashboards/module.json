@@ -1,0 +1,18 @@
+{
+  "name": "dashboards",
+  "version": "1.0.0",
+  "requires": [
+    "users"
+  ],
+  "edits": [
+    {
+      "path": "src/app/users/page.tsx",
+      "before": "before-1.txt",
+      "after": "after-1.txt"
+    }
+  ],
+  "schemaEdit": {
+    "before": "  accounts        Account[]\n",
+    "after": "  accounts        Account[]\n  dashboardAccess DashboardAccess?\n"
+  }
+}
